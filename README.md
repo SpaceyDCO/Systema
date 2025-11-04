@@ -1,6 +1,6 @@
 # Systema
 
-**Project Status:** [Design Phase Complete]
+**Project Status:** [Back-End Phase Complete]
 
 ---
 
