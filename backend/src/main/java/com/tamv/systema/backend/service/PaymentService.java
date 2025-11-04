@@ -1,13 +1,14 @@
-package com.tamv.systema.service;
+package com.tamv.systema.backend.service;
 
-import com.tamv.systema.dto.PaymentCreateRequest;
-import com.tamv.systema.entities.Invoice;
-import com.tamv.systema.entities.Payment;
-import com.tamv.systema.entities.Status;
-import com.tamv.systema.entities.StatusType;
-import com.tamv.systema.repositories.InvoiceRepository;
-import com.tamv.systema.repositories.PaymentRepository;
-import com.tamv.systema.repositories.StatusRepository;
+import com.tamv.systema.backend.dto.PaymentCreateRequest;
+import com.tamv.systema.backend.dto.PaymentResponse;
+import com.tamv.systema.backend.entities.Invoice;
+import com.tamv.systema.backend.entities.Payment;
+import com.tamv.systema.backend.entities.Status;
+import com.tamv.systema.backend.entities.StatusType;
+import com.tamv.systema.backend.repositories.InvoiceRepository;
+import com.tamv.systema.backend.repositories.PaymentRepository;
+import com.tamv.systema.backend.repositories.StatusRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -53,5 +54,14 @@ public class PaymentService {
             this.invoiceRepository.save(invoice);
         }
         return savedPayment;
+    }
+    public PaymentResponse createPaymentResponseDTO(Payment payment) {
+        PaymentResponse response = new PaymentResponse();
+        response.setId(payment.getId());
+        response.setInvoiceId(payment.getInvoice().getId());
+        response.setAmount(payment.getAmount());
+        response.setPaymentDate(payment.getPaymentDate());
+        response.setPaymentMethod(payment.getPaymentMethod());
+        return response;
     }
 }
