@@ -2,8 +2,6 @@ package com.tamv.systema.frontend.API;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
-import com.tamv.systema.frontend.CustomerViewController;
 import com.tamv.systema.frontend.model.Customer;
 
 import java.lang.reflect.Type;
