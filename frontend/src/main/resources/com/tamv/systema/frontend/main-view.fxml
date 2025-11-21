@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="987.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.tamv.systema.frontend.MainController">
+   <top>
+      <MenuBar BorderPane.alignment="CENTER">
+        <menus>
+          <Menu mnemonicParsing="false" text="File">
+            <items>
+              <MenuItem mnemonicParsing="false" text="Logout" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Help">
+            <items>
+              <MenuItem mnemonicParsing="false" text="About" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+   </top>
+   <left>
+      <VBox prefHeight="0.0" prefWidth="150.0" spacing="20.0" style="-fx-background-color: #f4f4f4;" BorderPane.alignment="CENTER">
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
+         <children>
+            <Button mnemonicParsing="false" onAction="#handleCustomersButton" text="Customers">
+               <font>
+                  <Font name="Georgia" size="12.0" />
+               </font></Button>
+            <Button layoutX="20.0" layoutY="20.0" mnemonicParsing="false" onAction="#handleInvoicesButton" text="Invoices">
+               <font>
+                  <Font name="Georgia" size="12.0" />
+               </font></Button>
+            <Button layoutX="20.0" layoutY="45.0" mnemonicParsing="false" onAction="#handleRepairsButton" text="Repair Orders">
+               <font>
+                  <Font name="Georgia" size="12.0" />
+               </font></Button>
+            <Button layoutX="20.0" layoutY="70.0" mnemonicParsing="false" onAction="#handleProductsButton" text="Products">
+               <font>
+                  <Font name="Georgia" size="12.0" />
+               </font></Button>
+         </children>
+      </VBox>
+   </left>
+   <center>
+      <AnchorPane fx:id="contentArea" BorderPane.alignment="CENTER" />
+   </center>
+   <bottom>
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" style="-fx-background-color: #e8e8e8;" BorderPane.alignment="CENTER">
+         <children>
+            <Label fx:id="statusBarLabel" text="Status: Logged in">
+               <font>
+                  <Font name="Georgia" size="24.0" />
+               </font>
+            </Label>
+         </children>
+         <padding>
+            <Insets left="10.0" />
+         </padding>
+      </HBox>
+   </bottom>
+</BorderPane>
