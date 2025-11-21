@@ -1,6 +1,6 @@
 package com.tamv.systema.frontend;
 
-import com.tamv.systema.frontend.API.AuthService;
+import com.tamv.systema.frontend.API.ApiService;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -8,9 +8,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 
 public class LoginController {
-    private final AuthService authService = new AuthService();
+    private final ApiService apiService;
     @FXML
     private TextField usernameField;
     @FXML
@@ -19,6 +20,9 @@ public class LoginController {
     private Button loginButton;
     @FXML
     private Label errorLabel;
+    public LoginController(ApiService api) {
+        this.apiService = api;
+    }
     @FXML
     protected void handleLoginButton(ActionEvent event) {
         String username = usernameField.getText();
@@ -30,12 +34,13 @@ public class LoginController {
         loginButton.setDisable(true);
         System.out.println("Login button clicked! Attempting to log in with user: " + username);
         new Thread(() -> {
-            boolean loginSuccess = this.authService.login(username, password);
+            boolean loginSuccess = this.apiService.login(username, password);
             Platform.runLater(() -> {
                 if(loginSuccess) {
                     System.out.println("Login succeeded for user: " + username);
                     errorLabel.setText("Login successful!");
-                    //Close window later and open new
+                    Stage currentStage = (Stage) loginButton.getScene().getWindow();
+                    MainApplication.showMainWindow(currentStage, username, this.apiService);
                 }else {
                     System.out.println("Login failed for user: " + username);
                     errorLabel.setText("Login failed: Invalid credentials");
@@ -43,7 +48,6 @@ public class LoginController {
                 loginButton.setDisable(false);
             });
         }).start();
-        //Add API Check
         errorLabel.setText("Logging in...");
     }
 }
