@@ -66,7 +66,6 @@ public class CustomerViewController {
     }
     @FXML
     public void handleNewCustomer(ActionEvent event) {
-        System.out.println("New customer button clicked");
         openCustomerForm(null);
     }
     @FXML
@@ -100,6 +99,12 @@ public class CustomerViewController {
             System.out.println("User canceled deletion");
         }
     }
+    @FXML
+    public void handleEditCustomer(ActionEvent event) {
+        Customer selectedCustomer = this.customerTable.getSelectionModel().getSelectedItem();
+        if(selectedCustomer == null) return;
+        openCustomerForm(selectedCustomer);
+    }
     private void openCustomerForm(Customer customer) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/tamv/systema/frontend/customer-form.fxml"));
@@ -108,7 +113,6 @@ public class CustomerViewController {
             controller.setCustomerData(customer);
             controller.setApi(this.api);
             controller.setOnSaveSuccess(this::refreshTable);
-            //TODO: detect if it's an edit of an existing customer, call the controller with fxmlLoader.getController() and set the data of the clicked customer...
             Stage stage = new Stage();
             stage.setTitle(customer == null ? "New Customer" : "Edit Customer");
             stage.setScene(new Scene(popup));

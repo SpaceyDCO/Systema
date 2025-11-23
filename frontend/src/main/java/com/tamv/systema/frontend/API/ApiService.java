@@ -93,6 +93,27 @@ public class ApiService {
             return false;
         }
     }
+    public Customer updateCustomer(Long id, Customer customer) {
+        String jsonBody = gson.toJson(customer);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_BASE_URL + "/customers/" + id))
+                .header("Authorization", createBasicAuthHeader(this.username, this.password))
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+        try {
+            HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+            if(response.statusCode() == 200) {
+                return gson.fromJson(response.body(), Customer.class);
+            }else {
+                System.err.println("Failed to update customer. Status: " + response.statusCode());
+                return null;
+            }
+        }catch(Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
     private String createBasicAuthHeader(String username, String password) {
         String valueToEncode = username + ":" + password;
         return "Basic " + Base64.getEncoder().encodeToString(valueToEncode.getBytes());

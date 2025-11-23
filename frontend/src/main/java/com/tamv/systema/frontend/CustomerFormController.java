@@ -51,6 +51,7 @@ public class CustomerFormController {
             return;
         }
         errorLabel.setText("");
+        final boolean isEditing = this.currentCustomer != null && this.currentCustomer.getId() != null;
         if(currentCustomer == null) {
             currentCustomer = new Customer();
         }
@@ -60,7 +61,7 @@ public class CustomerFormController {
         this.saveButton.setDisable(true);
         this.cancelButton.setDisable(true);
         new Thread(() -> {
-            Customer savedCustomer = api.createCustomer(currentCustomer);
+            Customer savedCustomer = isEditing ? api.updateCustomer(this.currentCustomer.getId(), this.currentCustomer) : api.createCustomer(currentCustomer);
             Platform.runLater(() -> {
                 if(savedCustomer != null) {
                     if(this.onSaveSuccess != null) {
