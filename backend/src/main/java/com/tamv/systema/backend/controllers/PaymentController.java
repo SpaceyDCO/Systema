@@ -26,7 +26,7 @@ public class PaymentController {
      * @return A list containing all payments made, empty list if no payments were made
      */
     @GetMapping("/invoice/{id}")
-    public ResponseEntity<List<Payment>> getPaymentsByInvoice(@PathVariable Long invoiceId) {
+    public ResponseEntity<List<Payment>> getPaymentsByInvoice(@PathVariable("id") Long invoiceId) {
         try {
             List<Payment> payments = this.paymentService.getPaymentsByInvoice(invoiceId);
             return ResponseEntity.ok(payments);

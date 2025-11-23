@@ -35,7 +35,7 @@ public class ProductController {
      * @return The product or 404 Not Found status
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable Long id) {
+    public ResponseEntity<Product> getProductById(@PathVariable("id") Long id) {
         Optional<Product> product = productRepository.findById(id);
         return product.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -60,7 +60,7 @@ public class ProductController {
      * @return The updated product or 404 Not Found status
      */
     @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product productDetails) {
+    public ResponseEntity<Product> updateProduct(@PathVariable("id") Long id, @RequestBody Product productDetails) {
         return productRepository.findById(id).map(existingProduct -> {
             existingProduct.setName(productDetails.getName());
             existingProduct.setDescription(productDetails.getDescription());
@@ -77,7 +77,7 @@ public class ProductController {
      * @return 204 No Content on success, or 404 Not Found
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteProduct(@PathVariable("id") Long id) {
         if(!productRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }

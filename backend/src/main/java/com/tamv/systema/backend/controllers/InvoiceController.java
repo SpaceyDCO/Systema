@@ -36,7 +36,7 @@ public class InvoiceController {
      * @return The invoice or 404 Not Found status
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Invoice> getInvoiceById(@PathVariable Long id) {
+    public ResponseEntity<Invoice> getInvoiceById(@PathVariable("id") Long id) {
         try {
             Invoice invoice = invoiceService.getInvoiceById(id);
             return ResponseEntity.ok(invoice);
@@ -71,7 +71,7 @@ public class InvoiceController {
      *
      */
     @PutMapping("/{id}/status")
-    public ResponseEntity<Invoice> updateInvoiceStatus(@PathVariable Long id, @RequestBody InvoiceStatusUpdateRequest request) {
+    public ResponseEntity<Invoice> updateInvoiceStatus(@PathVariable("id") Long id, @RequestBody InvoiceStatusUpdateRequest request) {
         try {
             Invoice updatedInvoice = invoiceService.updateInvoiceStatus(id, request.getStatusId());
             return ResponseEntity.ok(updatedInvoice);
@@ -87,7 +87,7 @@ public class InvoiceController {
      * 404 Not Found status otherwise
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteInvoice(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteInvoice(@PathVariable("id") Long id) {
         try {
             invoiceService.deleteInvoice(id);
             return ResponseEntity.noContent().build();
