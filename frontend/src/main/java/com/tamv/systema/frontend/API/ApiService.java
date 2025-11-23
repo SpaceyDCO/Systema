@@ -2,8 +2,6 @@ package com.tamv.systema.frontend.API;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
-import com.tamv.systema.frontend.CustomerViewController;
 import com.tamv.systema.frontend.model.Customer;
 
 import java.lang.reflect.Type;
@@ -74,6 +72,41 @@ public class ApiService {
                 return gson.fromJson(response.body(), Customer.class);
             }else {
                 System.err.println("Failed to create customer, status: " + response.statusCode() + ", Body: " + response.body());
+                return null;
+            }
+        }catch(Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    public boolean deleteCustomer(Long customerId) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_BASE_URL + "/customers/" + customerId))
+                .header("Authorization", createBasicAuthHeader(this.username, this.password))
+                .DELETE()
+                .build();
+        try {
+            HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.statusCode() == 204;
+        }catch(Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public Customer updateCustomer(Long id, Customer customer) {
+        String jsonBody = gson.toJson(customer);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_BASE_URL + "/customers/" + id))
+                .header("Authorization", createBasicAuthHeader(this.username, this.password))
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+        try {
+            HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+            if(response.statusCode() == 200) {
+                return gson.fromJson(response.body(), Customer.class);
+            }else {
+                System.err.println("Failed to update customer. Status: " + response.statusCode());
                 return null;
             }
         }catch(Exception e) {

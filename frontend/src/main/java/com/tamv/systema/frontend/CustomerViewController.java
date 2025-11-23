@@ -10,13 +10,13 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 public class CustomerViewController {
     private final ApiService api;
@@ -30,6 +30,11 @@ public class CustomerViewController {
     public TableColumn<Customer, String> emailColumn;
     @FXML
     public TableColumn<Customer, String> phoneColumn;
+    @FXML
+    public Button editButton;
+    @FXML
+    public Button deleteButton;
+
     public CustomerViewController(ApiService api) {
         this.api = api;
     }
@@ -47,11 +52,58 @@ public class CustomerViewController {
                 customerTable.setItems(observableList);
             });
         }).start();
+        this.editButton.setDisable(true);
+        this.deleteButton.setDisable(true);
+        this.customerTable.getSelectionModel().selectedItemProperty().addListener((observable, oldSelection, newSelection) -> {
+            if(newSelection != null) {
+                this.editButton.setDisable(false);
+                this.deleteButton.setDisable(false);
+            }else {
+                this.editButton.setDisable(true);
+                this.deleteButton.setDisable(true);
+            }
+        });
     }
     @FXML
     public void handleNewCustomer(ActionEvent event) {
-        System.out.println("New customer button clicked");
         openCustomerForm(null);
+    }
+    @FXML
+    public void handleDeleteCustomer(ActionEvent event) {
+        Customer selectedCustomer = this.customerTable.getSelectionModel().getSelectedItem();
+        if(selectedCustomer == null) {
+            return;
+        }
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Delete Customer");
+        alert.setHeaderText("Are you sure you want to delete this customer?");
+        alert.setContentText("Customer: " + selectedCustomer.getFullName() + "\nThis action cannot be undone.");
+        Optional<ButtonType> result = alert.showAndWait();
+        if(result.isPresent() && result.get() == ButtonType.OK) {
+            System.out.println("User confirmed deletion for customer " + selectedCustomer.getFullName() + " with id " + selectedCustomer.getId());
+            new Thread(() -> {
+                boolean success = api.deleteCustomer(selectedCustomer.getId());
+                Platform.runLater(() -> {
+                    if(success) {
+                        refreshTable();
+                    }else {
+                        Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                        errorAlert.setTitle("Deletion Failed");
+                        errorAlert.setHeaderText("Could not delete customer");
+                        errorAlert.setContentText("The customer could not be deleted from the database. Please try again.");
+                        errorAlert.showAndWait();
+                    }
+                });
+            }).start();
+        }else {
+            System.out.println("User canceled deletion");
+        }
+    }
+    @FXML
+    public void handleEditCustomer(ActionEvent event) {
+        Customer selectedCustomer = this.customerTable.getSelectionModel().getSelectedItem();
+        if(selectedCustomer == null) return;
+        openCustomerForm(selectedCustomer);
     }
     private void openCustomerForm(Customer customer) {
         try {
@@ -61,7 +113,6 @@ public class CustomerViewController {
             controller.setCustomerData(customer);
             controller.setApi(this.api);
             controller.setOnSaveSuccess(this::refreshTable);
-            //TODO: detect if it's an edit of an existing customer, call the controller with fxmlLoader.getController() and set the data of the clicked customer...
             Stage stage = new Stage();
             stage.setTitle(customer == null ? "New Customer" : "Edit Customer");
             stage.setScene(new Scene(popup));
