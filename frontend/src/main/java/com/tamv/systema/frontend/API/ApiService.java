@@ -79,6 +79,20 @@ public class ApiService {
             return null;
         }
     }
+    public boolean deleteCustomer(Long customerId) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_BASE_URL + "/customers/" + customerId))
+                .header("Authorization", createBasicAuthHeader(this.username, this.password))
+                .DELETE()
+                .build();
+        try {
+            HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.statusCode() == 204;
+        }catch(Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
     private String createBasicAuthHeader(String username, String password) {
         String valueToEncode = username + ":" + password;
         return "Basic " + Base64.getEncoder().encodeToString(valueToEncode.getBytes());
