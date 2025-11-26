@@ -3,6 +3,7 @@ package com.tamv.systema.frontend.API;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.tamv.systema.frontend.model.Customer;
+import com.tamv.systema.frontend.model.Product;
 
 import java.lang.reflect.Type;
 import java.net.URI;
@@ -45,7 +46,6 @@ public class ApiService {
         try {
             HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
             if(response.statusCode() == 200) {
-                Gson gson = new Gson();
                 Type customerListType = new TypeToken<ArrayList<Customer>>(){}.getType();
                 return gson.fromJson(response.body(), customerListType);
             }else {
@@ -112,6 +112,26 @@ public class ApiService {
         }catch(Exception e) {
             e.printStackTrace();
             return null;
+        }
+    }
+    public List<Product> getProducts() {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_BASE_URL + "/products"))
+                .header("Authorization", createBasicAuthHeader(this.username, this.password))
+                .GET()
+                .build();
+        try {
+            HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+            if(response.statusCode() == 200) {
+                Type productListType = new TypeToken<ArrayList<Product>>(){}.getType();
+                return gson.fromJson(response.body(), productListType);
+            }else {
+                System.out.println("Error while trying to fetch product list, status: " + response.statusCode());
+                return new ArrayList<>();
+            }
+        }catch(Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
         }
     }
     private String createBasicAuthHeader(String username, String password) {
