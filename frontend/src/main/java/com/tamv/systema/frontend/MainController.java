@@ -1,6 +1,7 @@
 package com.tamv.systema.frontend;
 
 import com.tamv.systema.frontend.API.ApiService;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -36,6 +37,7 @@ public class MainController {
     @FXML
     public void handleProductsButton() {
         System.out.println("Products button clicked");
+        loadView("product-view.fxml");
     }
 
     private void loadView(String fxmlFileName) {
@@ -45,6 +47,8 @@ public class MainController {
             fxmlLoader.setControllerFactory(controllerClass -> {
                 if(controllerClass == CustomerViewController.class) {
                     return new CustomerViewController(this.api);
+                }if(controllerClass == ProductViewController.class) {
+                    return new ProductViewController(this.api);
                 }else {
                     try {
                         return controllerClass.getDeclaredConstructor().newInstance();
