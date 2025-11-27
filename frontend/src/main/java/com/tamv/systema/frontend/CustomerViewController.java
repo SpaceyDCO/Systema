@@ -48,9 +48,7 @@ public class CustomerViewController {
         new Thread(() -> {
             List<Customer> customers = api.getCustomers();
             ObservableList<Customer> observableList = FXCollections.observableArrayList(customers);
-            Platform.runLater(() -> {
-                customerTable.setItems(observableList);
-            });
+            Platform.runLater(() -> customerTable.setItems(observableList));
         }).start();
         this.editButton.setDisable(true);
         this.deleteButton.setDisable(true);
@@ -127,9 +125,7 @@ public class CustomerViewController {
         new Thread(() -> {
             List<Customer> customers = api.getCustomers();
             ObservableList<Customer> observableList = FXCollections.observableArrayList(customers);
-            Platform.runLater(() -> {
-                customerTable.setItems(observableList);
-            });
+            Platform.runLater(() -> customerTable.setItems(observableList));
         }).start();
     }
 }
