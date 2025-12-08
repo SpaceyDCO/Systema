@@ -134,6 +134,62 @@ public class ApiService {
             return new ArrayList<>();
         }
     }
+    public Product createProduct(Product product) {
+        String jsonBody = gson.toJson(product);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_BASE_URL + "/products"))
+                .header("Authorization", createBasicAuthHeader(this.username, this.password))
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+        try {
+            HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+            if(response.statusCode() == 201) {
+                return gson.fromJson(response.body(), Product.class);
+            }else {
+                System.err.println("Failed to create product, status: " + response.statusCode() + ", Body: " + response.body());
+                return null;
+            }
+        }catch(Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    public boolean deleteProduct(Long productId) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_BASE_URL + "/products/" + productId))
+                .header("Authorization", createBasicAuthHeader(this.username, this.password))
+                .DELETE()
+                .build();
+        try {
+            HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.statusCode() == 204;
+        }catch(Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public Product updateProduct(Long id, Product product) {
+        String jsonBody = gson.toJson(product);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_BASE_URL + "/products/" + id))
+                .header("Authorization", createBasicAuthHeader(this.username, this.password))
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+        try {
+            HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+            if(response.statusCode() == 200) {
+                return gson.fromJson(response.body(), Product.class);
+            }else {
+                System.err.println("Failed to update product. Status: " + response.statusCode());
+                return null;
+            }
+        }catch(Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
     private String createBasicAuthHeader(String username, String password) {
         String valueToEncode = username + ":" + password;
         return "Basic " + Base64.getEncoder().encodeToString(valueToEncode.getBytes());
