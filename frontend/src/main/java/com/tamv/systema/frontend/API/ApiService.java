@@ -3,6 +3,7 @@ package com.tamv.systema.frontend.API;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.tamv.systema.frontend.model.Customer;
+import com.tamv.systema.frontend.model.Product;
 
 import java.lang.reflect.Type;
 import java.net.URI;
@@ -45,7 +46,6 @@ public class ApiService {
         try {
             HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
             if(response.statusCode() == 200) {
-                Gson gson = new Gson();
                 Type customerListType = new TypeToken<ArrayList<Customer>>(){}.getType();
                 return gson.fromJson(response.body(), customerListType);
             }else {
@@ -107,6 +107,82 @@ public class ApiService {
                 return gson.fromJson(response.body(), Customer.class);
             }else {
                 System.err.println("Failed to update customer. Status: " + response.statusCode());
+                return null;
+            }
+        }catch(Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    public List<Product> getProducts() {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_BASE_URL + "/products"))
+                .header("Authorization", createBasicAuthHeader(this.username, this.password))
+                .GET()
+                .build();
+        try {
+            HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+            if(response.statusCode() == 200) {
+                Type productListType = new TypeToken<ArrayList<Product>>(){}.getType();
+                return gson.fromJson(response.body(), productListType);
+            }else {
+                System.out.println("Error while trying to fetch product list, status: " + response.statusCode());
+                return new ArrayList<>();
+            }
+        }catch(Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+    public Product createProduct(Product product) {
+        String jsonBody = gson.toJson(product);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_BASE_URL + "/products"))
+                .header("Authorization", createBasicAuthHeader(this.username, this.password))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+        try {
+            HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+            if(response.statusCode() == 201) {
+                return gson.fromJson(response.body(), Product.class);
+            }else {
+                System.err.println("Failed to create product, status: " + response.statusCode() + ", Body: " + response.body());
+                return null;
+            }
+        }catch(Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    public boolean deleteProduct(Long productId) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_BASE_URL + "/products/" + productId))
+                .header("Authorization", createBasicAuthHeader(this.username, this.password))
+                .DELETE()
+                .build();
+        try {
+            HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.statusCode() == 204;
+        }catch(Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public Product updateProduct(Long id, Product product) {
+        String jsonBody = gson.toJson(product);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_BASE_URL + "/products/" + id))
+                .header("Authorization", createBasicAuthHeader(this.username, this.password))
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+        try {
+            HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+            if(response.statusCode() == 200) {
+                return gson.fromJson(response.body(), Product.class);
+            }else {
+                System.err.println("Failed to update product. Status: " + response.statusCode());
                 return null;
             }
         }catch(Exception e) {
