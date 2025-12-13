@@ -37,7 +37,7 @@ public class RepairOrderService {
         Customer customer = this.customerRepository.findById(request.getCustomerId())
                 .orElseThrow(() -> new RuntimeException("Customer not found with id: " + request.getCustomerId()));
         Status initialStatus = this.statusRepository.findByNameAndType("PENDING", StatusType.REPAIR_ORDER)
-                .orElseThrow(() -> new RuntimeException("Initial status 'DRAFT' not found. Please make sure default statuses are configured in the database."));
+                .orElseThrow(() -> new RuntimeException("Initial status 'PENDING' not found. Please make sure default statuses are configured in the database."));
         RepairOrder repairOrder = new RepairOrder();
         repairOrder.setCustomer(customer);
         repairOrder.setEquipmentName(request.getEquipmentName());
