@@ -140,7 +140,7 @@ public class ApiService {
                 .uri(URI.create(API_BASE_URL + "/products"))
                 .header("Authorization", createBasicAuthHeader(this.username, this.password))
                 .header("Content-Type", "application/json")
-                .PUT(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                 .build();
         try {
             HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
