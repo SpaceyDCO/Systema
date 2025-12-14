@@ -1,25 +1,30 @@
 package com.tamv.systema.frontend.API;
 
-import com.google.gson.Gson;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import com.tamv.systema.frontend.model.Customer;
 import com.tamv.systema.frontend.model.Product;
+import com.tamv.systema.frontend.model.RepairOrder;
+import com.tamv.systema.frontend.model.Status;
 
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 public class ApiService {
     private String username;
     private String password;
     private static final String API_BASE_URL = "http://localhost:8080/api/v1";
     private final HttpClient client = HttpClient.newHttpClient();
-    private final Gson gson = new Gson();
+    private final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDate.class, (JsonDeserializer<LocalDate>) (json, type, context) -> LocalDate.parse(json.getAsString(), DateTimeFormatter.ISO_LOCAL_DATE))
+            .registerTypeAdapter(LocalDate.class, (JsonSerializer<LocalDate>) (date, type, context) -> new JsonPrimitive(date.format(DateTimeFormatter.ISO_LOCAL_DATE)))
+            .create();
     // TODO: Refactor login to use a dedicated token-based endpoint.
     public boolean login(String username, String password) {
         HttpRequest request = HttpRequest.newBuilder()
@@ -188,6 +193,121 @@ public class ApiService {
         }catch(Exception e) {
             e.printStackTrace();
             return null;
+        }
+    }
+    public List<Status> getStatuses() {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_BASE_URL + "/statuses"))
+                .header("Authorization", createBasicAuthHeader(this.username, this.password))
+                .GET()
+                .build();
+        try {
+            HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+            if(response.statusCode() == 200) {
+                Type statusListType = new TypeToken<ArrayList<Status>>(){}.getType();
+                return gson.fromJson(response.body(), statusListType);
+            }else {
+                System.err.println("Could not fetch status list, code: " + response.statusCode());
+                return new ArrayList<>();
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+    public List<RepairOrder> getRepairOrders() {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_BASE_URL + "/orders"))
+                .header("Authorization", createBasicAuthHeader(this.username, this.password))
+                .GET()
+                .build();
+        try {
+            HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+            if(response.statusCode() == 200) {
+                Type repairListType = new TypeToken<ArrayList<RepairOrder>>(){}.getType();
+                return gson.fromJson(response.body(), repairListType);
+            }else {
+                System.err.println("Could not fetch repair orders list, code: " + response.statusCode());
+                return new ArrayList<>();
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+    //TODO: endpoint to update a repair order's received date
+    public RepairOrder createRepairOrder(Long customerId, String equipmentName, String serialNumber, String reportedIssue) {
+        String jsonBody = String.format(
+                "{\"customerId\":%d,\"equipmentName\":\"%s\",\"serialNumber\":\"%s\",\"reportedIssue\":\"%s\"}",
+                customerId, equipmentName, serialNumber, reportedIssue
+        );
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_BASE_URL + "/orders"))
+                .header("Authorization", createBasicAuthHeader(this.username, this.password))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+        try {
+            HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+            if(response.statusCode() == 201) {
+                return gson.fromJson(response.body(), RepairOrder.class);
+            }else {
+                System.err.println("Failed to create repair order, status: " + response.statusCode());
+                return null;
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    public boolean updateRepairOrderStatus(Long orderId, Long statusId) {
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("statusId", String.valueOf(statusId));
+        String jsonBody = gson.toJson(requestBody);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_BASE_URL + "/orders/" + orderId + "/status"))
+                .header("Authorization", createBasicAuthHeader(this.username, this.password))
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+        try {
+            HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.statusCode() == 200;
+        }catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public boolean updateRepairOrderNotes(Long orderId, String technicianNotes) {
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("technicianNotes", technicianNotes);
+        String jsonBody = gson.toJson(requestBody);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_BASE_URL + "/orders/" + orderId + "/notes"))
+                .header("Authorization", createBasicAuthHeader(this.username, this.password))
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+        try {
+            HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.statusCode() == 200;
+        }catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public boolean deleteRepairOrder(Long orderId) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_BASE_URL + "/orders/" + orderId))
+                .header("Authorization", createBasicAuthHeader(this.username, this.password))
+                .DELETE()
+                .build();
+        try {
+            HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.statusCode() == 204;
+        }catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
     private String createBasicAuthHeader(String username, String password) {

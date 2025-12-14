@@ -33,6 +33,7 @@ public class MainController {
     @FXML
     public void handleRepairsButton() {
         System.out.println("Repairs button clicked");
+        loadView("repair-order-view.fxml");
     }
     @FXML
     public void handleProductsButton() {
@@ -49,6 +50,8 @@ public class MainController {
                     return new CustomerViewController(this.api);
                 }if(controllerClass == ProductViewController.class) {
                     return new ProductViewController(this.api);
+                }if(controllerClass == RepairOrderViewController.class) {
+                    return new RepairOrderViewController(this.api);
                 }else {
                     try {
                         return controllerClass.getDeclaredConstructor().newInstance();
