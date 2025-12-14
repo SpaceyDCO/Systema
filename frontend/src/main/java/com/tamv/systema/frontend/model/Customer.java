@@ -10,4 +10,8 @@ public class Customer {
     private String fullName;
     private String email;
     private String phoneNumber;
+    @Override
+    public String toString() {
+        return fullName;
+    }
 }
