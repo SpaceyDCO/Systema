@@ -13,4 +13,8 @@ public class Product {
     private String description;
     private BigDecimal defaultPrice;
     private String category;
+    @Override
+    public String toString() {
+        return this.name;
+    }
 }
