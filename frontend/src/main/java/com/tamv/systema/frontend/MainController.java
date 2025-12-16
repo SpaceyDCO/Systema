@@ -29,6 +29,7 @@ public class MainController {
     @FXML
     public void handleInvoicesButton() {
         System.out.println("Invoices button clicked");
+        loadView("invoice-view.fxml");
     }
     @FXML
     public void handleRepairsButton() {
@@ -52,6 +53,8 @@ public class MainController {
                     return new ProductViewController(this.api);
                 }if(controllerClass == RepairOrderViewController.class) {
                     return new RepairOrderViewController(this.api);
+                }if(controllerClass == InvoiceViewController.class) {
+                    return new InvoiceViewController(this.api);
                 }else {
                     try {
                         return controllerClass.getDeclaredConstructor().newInstance();
