@@ -84,4 +84,7 @@ public class InvoiceService {
         savedInvoice.setTotalAmount(totalAmount);
         return invoiceRepository.save(savedInvoice);
     }
+    public List<InvoiceItem> getInvoiceItems(Long invoiceId) {
+        return invoiceItemRepository.findByInvoiceId(invoiceId);
+    }
 }
