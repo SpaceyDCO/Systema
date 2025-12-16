@@ -3,6 +3,7 @@ package com.tamv.systema.backend.controllers;
 import com.tamv.systema.backend.dto.InvoiceCreateRequest;
 import com.tamv.systema.backend.dto.InvoiceStatusUpdateRequest;
 import com.tamv.systema.backend.entities.Invoice;
+import com.tamv.systema.backend.entities.InvoiceItem;
 import com.tamv.systema.backend.service.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -92,6 +93,21 @@ public class InvoiceController {
             invoiceService.deleteInvoice(id);
             return ResponseEntity.noContent().build();
         }catch(RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    /**
+     * GET /api/v1/invoices/{id}/items
+     * Retrieves all items for a specific invoice
+     * @param id The invoice ID
+     * @return List of invoice items for that invoice
+     */
+    @GetMapping("/{id}/items")
+    public ResponseEntity<List<InvoiceItem>> getInvoiceItems(@PathVariable("id") Long id) {
+        try {
+            List<InvoiceItem> items = invoiceService.getInvoiceItems(id);
+            return ResponseEntity.ok(items);
+        }catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }

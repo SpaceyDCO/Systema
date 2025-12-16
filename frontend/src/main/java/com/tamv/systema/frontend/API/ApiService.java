@@ -2,10 +2,7 @@ package com.tamv.systema.frontend.API;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-import com.tamv.systema.frontend.model.Customer;
-import com.tamv.systema.frontend.model.Product;
-import com.tamv.systema.frontend.model.RepairOrder;
-import com.tamv.systema.frontend.model.Status;
+import com.tamv.systema.frontend.model.*;
 
 import java.lang.reflect.Type;
 import java.net.URI;
@@ -308,6 +305,103 @@ public class ApiService {
         }catch (Exception e) {
             e.printStackTrace();
             return false;
+        }
+    }
+    public List<Invoice> getInvoices() {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_BASE_URL + "/invoices"))
+                .header("Authorization", createBasicAuthHeader(this.username, this.password))
+                .GET()
+                .build();
+        try {
+            HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+            if(response.statusCode() == 200) {
+                Type invoiceListType = new TypeToken<ArrayList<Invoice>>(){}.getType();
+                return gson.fromJson(response.body(), invoiceListType);
+            }else {
+                System.err.println("Could not fetch invoices. Status: " + response.statusCode());
+                return new ArrayList<>();
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+    public Invoice createInvoice(Long customerId, List<InvoiceItemRequest> items, LocalDate dueDate) {
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("customerId", customerId);
+        requestBody.put("items", items);
+        requestBody.put("dueDate", dueDate);
+        String jsonBody = gson.toJson(requestBody);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_BASE_URL + "/invoices"))
+                .header("Authorization", createBasicAuthHeader(this.username, this.password))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+        try {
+            HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+            if(response.statusCode() == 201) {
+                return gson.fromJson(response.body(), Invoice.class);
+            }else {
+                System.err.println("Failed to create the invoice. Status: " + response.statusCode());
+                return null;
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    public boolean updateInvoiceStatus(Long invoiceId, Long statusId) {
+        Map<String, Long> requestBody = new HashMap<>();
+        requestBody.put("statusId", statusId);
+        String jsonBody = gson.toJson(requestBody);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_BASE_URL + "/invoices/" + invoiceId + "/status"))
+                .header("Authorization", createBasicAuthHeader(this.username, this.password))
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+        try {
+            HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.statusCode() == 200;
+        }catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public boolean deleteInvoice(Long invoiceId) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_BASE_URL + "/invoices/" + invoiceId))
+                .header("Authorization", createBasicAuthHeader(this.username, this.password))
+                .DELETE()
+                .build();
+        try {
+            HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.statusCode() == 204;
+        }catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public List<InvoiceItem> getInvoiceItems(Long invoiceId) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_BASE_URL + "/invoices/" + invoiceId + "/items"))
+                .header("Authorization", createBasicAuthHeader(this.username, this.password))
+                .GET()
+                .build();
+        try {
+            HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+            if(response.statusCode() == 200) {
+                Type itemListType = new TypeToken<ArrayList<InvoiceItem>>(){}.getType();
+                return gson.fromJson(response.body(), itemListType);
+            }else {
+                System.err.println("Could not fetch invoice items. Status: " + response.statusCode());
+                return new ArrayList<>();
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
         }
     }
     private String createBasicAuthHeader(String username, String password) {
