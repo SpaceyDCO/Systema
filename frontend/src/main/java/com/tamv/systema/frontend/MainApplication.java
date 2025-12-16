@@ -4,7 +4,9 @@ import com.tamv.systema.frontend.API.ApiService;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.io.IOException;
 
@@ -25,7 +27,9 @@ public class MainApplication extends Application {
                 }
             }
         });
-        Scene scene = new Scene(fxmlLoader.load(), 600, 195);
+        Scene scene = new Scene(fxmlLoader.load());
+        stage.initStyle(StageStyle.TRANSPARENT);
+        scene.setFill(Color.TRANSPARENT);
         stage.setTitle("Systema login");
         stage.setScene(scene);
         stage.show();

@@ -8,10 +8,16 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
+
+import java.util.Objects;
 
 public class LoginController {
     private final ApiService apiService;
+    @FXML
+    public ImageView logoImageView;
     @FXML
     private TextField usernameField;
     @FXML
@@ -22,6 +28,16 @@ public class LoginController {
     private Label errorLabel;
     public LoginController(ApiService api) {
         this.apiService = api;
+    }
+    @FXML
+    public void initialize() {
+        try {
+            Image logo = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/tamv/systema/frontend/logo.png")));
+            this.logoImageView.setImage(logo);
+        }catch (Exception e) {
+            System.err.println("Could not load logo image");
+            e.printStackTrace();
+        }
     }
     @FXML
     protected void handleLoginButton(ActionEvent event) {
