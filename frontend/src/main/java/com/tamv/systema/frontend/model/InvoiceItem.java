@@ -15,13 +15,4 @@ public class InvoiceItem {
     private Product product;
     private int quantity;
     private BigDecimal priceAtSale;
-    public String getProductName() {
-        return product != null ? product.getName() : "N/A";
-    }
-    public BigDecimal getLineTotal() {
-        if(priceAtSale != null && quantity > 0) {
-            return priceAtSale.multiply(BigDecimal.valueOf(quantity));
-        }
-        return BigDecimal.ZERO;
-    }
 }
