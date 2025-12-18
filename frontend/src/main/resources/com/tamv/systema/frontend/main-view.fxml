@@ -10,7 +10,10 @@
     <left>
         <VBox minWidth="220" spacing="10.0" styleClass="sidebar">
             <HBox alignment="CENTER" styleClass="sidebar-header">
-                <Label styleClass="app-title" text="Systema 🏥" />
+                <Label styleClass="app-title" text="Systema 🏥">
+               <padding>
+                  <Insets top="5.0" />
+               </padding></Label>
             </HBox>
             <VBox alignment="CENTER" prefWidth="190.0" spacing="30.0" styleClass="nav-buttons">
                 <Button fx:id="homeButton" onAction="#onHomeClicked" styleClass="nav-button selected" text="🏠 Home" />
