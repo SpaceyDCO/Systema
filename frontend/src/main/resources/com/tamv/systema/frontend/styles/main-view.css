@@ -85,6 +85,22 @@
     -fx-effect: dropshadow(gaussian, rgba(45, 159, 133, 0.4), 12, 0, 0, 4);
 }
 
+.user-menu .menu-item {
+    -fx-background-color: white;
+}
+
+.user-menu .menu-item .label {
+    -fx-text-fill: #2d3748;
+}
+
+.user-menu .menu-item:hover {
+    -fx-background-color: #f0f4f8;
+}
+
+.user-menu .menu-item:hover .label {
+    -fx-text-fill: #48c9a8;
+}
+
 .content-area {
     -fx-background-color: #f5f8fa;
 }
