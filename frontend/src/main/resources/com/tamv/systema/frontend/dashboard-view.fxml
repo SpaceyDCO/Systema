@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.tamv.systema.frontend.DashboardViewController"
+      styleClass="dashboard-container"
+      stylesheets="@styles/dashboard-view.css"
+      spacing="20"
+      alignment="TOP_CENTER">
+
+    <GridPane styleClass="stats-grid" hgap="20" vgap="20">
+
+        <VBox styleClass="stat-card" GridPane.columnIndex="0" GridPane.rowIndex="0">
+            <Label text="Total Customers" styleClass="stat-label"/>
+            <Label text="--" styleClass="stat-number"/>
+        </VBox>
+
+        <VBox styleClass="stat-card" GridPane.columnIndex="1" GridPane.rowIndex="0">
+            <Label text="Active Repairs" styleClass="stat-label"/>
+            <Label text="--" styleClass="stat-number"/>
+        </VBox>
+
+        <VBox styleClass="stat-card" GridPane.columnIndex="0" GridPane.rowIndex="1">
+            <Label text="Unpaid Invoices" styleClass="stat-label"/>
+            <Label text="--" styleClass="stat-number"/>
+        </VBox>
+
+        <VBox styleClass="stat-card" GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <Label text="Overdue Invoices" styleClass="stat-label"/>
+            <Label text="--" styleClass="stat-number"/>
+        </VBox>
+
+    </GridPane>
+
+</VBox>
