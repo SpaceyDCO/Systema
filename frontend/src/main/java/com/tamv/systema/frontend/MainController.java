@@ -1,44 +1,70 @@
 package com.tamv.systema.frontend;
 
 import com.tamv.systema.frontend.API.ApiService;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.control.MenuButton;
+import javafx.scene.layout.StackPane;
 import lombok.Setter;
 
 import java.io.IOException;
 
 public class MainController {
+    @FXML
+    public Button customersButton;
+    @FXML
+    public Button invoicesButton;
+    @FXML
+    public Button repairsButton;
+    @FXML
+    public Button productsButton;
+    @FXML
+    public MenuButton userMenuButton;
     @Setter
     private ApiService api;
     @FXML
-    private AnchorPane contentArea;
+    private StackPane contentArea;
     @FXML
-    private Label statusBarLabel;
+    private Button homeButton;
+    private Button currentSelectedButton;
     public void initializeWithUsername(String username) {
-        statusBarLabel.setText("Logged in as: " + username);
+        this.userMenuButton.setText("\uD83D\uDC64 " + username);
+    }
+    @FXML
+    public void initialize() {
+        currentSelectedButton = homeButton;
+        loadView("dashboard-view.fxml");
+    }
+    @FXML
+    public void onHomeClicked() {
+        setSelectedButton(homeButton);
+        loadView("dashboard-view.fxml");
     }
     @FXML
     public void handleCustomersButton() {
         System.out.println("Customers button clicked");
+        setSelectedButton(customersButton);
         loadView("customer-view.fxml");
     }
     @FXML
     public void handleInvoicesButton() {
         System.out.println("Invoices button clicked");
+        setSelectedButton(invoicesButton);
         loadView("invoice-view.fxml");
     }
     @FXML
     public void handleRepairsButton() {
         System.out.println("Repairs button clicked");
+        setSelectedButton(repairsButton);
         loadView("repair-order-view.fxml");
     }
     @FXML
     public void handleProductsButton() {
         System.out.println("Products button clicked");
+        setSelectedButton(productsButton);
         loadView("product-view.fxml");
     }
 
@@ -66,13 +92,19 @@ public class MainController {
             Parent view = fxmlLoader.load();
             contentArea.getChildren().clear();
             contentArea.getChildren().add(view);
-            AnchorPane.setTopAnchor(view, 0.0);
-            AnchorPane.setBottomAnchor(view, 0.0);
-            AnchorPane.setLeftAnchor(view, 0.0);
-            AnchorPane.setRightAnchor(view, 0.0);
+//            AnchorPane.setTopAnchor(view, 0.0);
+//            AnchorPane.setBottomAnchor(view, 0.0);
+//            AnchorPane.setLeftAnchor(view, 0.0);
+//            AnchorPane.setRightAnchor(view, 0.0);
         }catch(IOException e) {
             e.printStackTrace();
-            statusBarLabel.setText("Could not load view " + fxmlFileName);
         }
+    }
+    private void setSelectedButton(Button button) {
+        if(currentSelectedButton != null) {
+            currentSelectedButton.getStyleClass().remove("selected");
+        }
+        button.getStyleClass().add("selected");
+        this.currentSelectedButton = button;
     }
 }
