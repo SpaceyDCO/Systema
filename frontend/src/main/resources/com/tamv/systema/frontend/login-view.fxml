@@ -63,7 +63,7 @@
                   <Font name="Georgia" size="12.0" />
                </font>
             </Hyperlink>
-            <Label fx:id="errorLabel" maxWidth="350.0" styleClass="error-label" textAlignment="CENTER" wrapText="true">
+            <Label fx:id="errorLabel" alignment="CENTER" maxWidth="350.0" styleClass="error-label" textAlignment="CENTER" wrapText="true">
                <font>
                   <Font name="Georgia" size="12.0" />
                </font>

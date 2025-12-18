@@ -117,7 +117,8 @@
 }
 
 .error-label {
-    -fx-text-fill: #c41e3a;
+    -fx-text-fill: #000000;
+    -fx-opacity: 0.5;
     -fx-font-size: 12;
     -fx-font-weight: bold;
     -fx-padding: 10 0 0 0;
