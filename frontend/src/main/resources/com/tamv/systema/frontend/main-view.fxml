@@ -30,9 +30,8 @@
     </left>
     <top>
         <HBox alignment="CENTER_LEFT" spacing="20" styleClass="top-bar">
-            <TextField promptText="🔍 Search..." styleClass="search-bar" HBox.hgrow="ALWAYS" />
             <Region HBox.hgrow="ALWAYS" />
-            <MenuButton fx:id="userMenuButton" styleClass="user-menu" text="👤 Spacey">
+            <MenuButton fx:id="userMenuButton" styleClass="user-menu" text="👤 Spacey" textFill="WHITE">
                 <items>
                     <MenuItem text="Profile" />
                     <MenuItem text="Settings" />
