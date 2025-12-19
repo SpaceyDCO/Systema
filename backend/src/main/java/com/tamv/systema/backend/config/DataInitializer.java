@@ -18,7 +18,7 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) throws Exception {
         if(statusRepository.count() == 0) {
             statusRepository.save(new Status(null, "PENDING", StatusType.REPAIR_ORDER));
-            statusRepository.save(new Status(null, "IN PROGRESS", StatusType.REPAIR_ORDER));
+            statusRepository.save(new Status(null, "IN_PROGRESS", StatusType.REPAIR_ORDER));
             statusRepository.save(new Status(null, "COMPLETED", StatusType.REPAIR_ORDER));
             statusRepository.save(new Status(null, "CANCELLED", StatusType.REPAIR_ORDER));
             statusRepository.save(new Status(null, "UNPAID", StatusType.INVOICE));
