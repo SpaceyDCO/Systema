@@ -3,125 +3,144 @@ package com.tamv.systema.frontend;
 import com.tamv.systema.frontend.API.ApiService;
 import com.tamv.systema.frontend.model.RepairOrder;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 
 public class RepairOrderViewController {
     private final ApiService api;
     @FXML
-    public TableView<RepairOrder> repairOrderTable;
+    public TextField searchField;
     @FXML
-    public TableColumn<RepairOrder, Long> idColumn;
-    @FXML
-    public TableColumn<RepairOrder, String> customerNameColumn;
-    @FXML
-    public TableColumn<RepairOrder, String> equipmentColumn;
-    @FXML
-    public TableColumn<RepairOrder, String> serialColumn;
-    @FXML
-    public TableColumn<RepairOrder, LocalDate> dateColumn;
-    @FXML
-    public TableColumn<RepairOrder, String> statusColumn;
-    @FXML
-    public Button newButton;
-    @FXML
-    public Button editButton;
-    @FXML
-    public Button deleteButton;
+    public FlowPane cardsContainer;
+    private List<RepairOrder> allRepairs;
+
     public RepairOrderViewController(ApiService api) {
         this.api = api;
     }
     @FXML
     public void initialize() {
         System.out.println("Populating repair order table...");
-        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-        customerNameColumn.setCellValueFactory(new PropertyValueFactory<>("customerName"));
-        equipmentColumn.setCellValueFactory(new PropertyValueFactory<>("equipmentName"));
-        serialColumn.setCellValueFactory(new PropertyValueFactory<>("serialNumber"));
-        dateColumn.setCellValueFactory(new PropertyValueFactory<>("dateReceived"));
-        statusColumn.setCellValueFactory(new PropertyValueFactory<>("statusName"));
-        new Thread(() -> {
-            List<RepairOrder> orders = api.getRepairOrders();
-            ObservableList<RepairOrder> observableList = FXCollections.observableArrayList(orders);
-            Platform.runLater(() -> this.repairOrderTable.setItems(observableList));
-        }).start();
-        this.editButton.setDisable(true);
-        this.deleteButton.setDisable(true);
-        this.repairOrderTable.getSelectionModel().selectedItemProperty().addListener((observable, oldSelection, newSelection) -> {
-            if(newSelection != null) {
-                this.editButton.setDisable(false);
-                this.deleteButton.setDisable(false);
-            }else {
-                this.editButton.setDisable(true);
-                this.deleteButton.setDisable(true);
-            }
-        });
+        loadRepairs();
     }
     @FXML
-    public void handleNewOrder(ActionEvent event) {
+    public void onAddRepair() {
         openRepairOrderForm(null);
     }
     @FXML
-    public void handleDelete(ActionEvent event) {
-        RepairOrder selectedOrder = this.repairOrderTable.getSelectionModel().getSelectedItem();
-        if (selectedOrder == null) {
-            return;
-        }
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Delete Repair Order");
-        alert.setHeaderText("Are you sure you want to delete this repair order?");
-        alert.setContentText("Order ID: " + selectedOrder.getId() +
-                "\nEquipment: " + selectedOrder.getEquipmentName() +
-                "\nThis action cannot be undone.");
-        Optional<ButtonType> result = alert.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK) {
-            System.out.println("User confirmed deletion for repair order " + selectedOrder.getId());
-            new Thread(() -> {
-                boolean success = api.deleteRepairOrder(selectedOrder.getId());
-                Platform.runLater(() -> {
-                    if (success) {
-                        refreshTable();
-                    } else {
-                        Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-                        errorAlert.setTitle("Deletion Failed");
-                        errorAlert.setHeaderText("Could not delete repair order");
-                        errorAlert.setContentText("The repair order could not be deleted from the database. Please try again.");
-                        errorAlert.showAndWait();
-                    }
-                });
-            }).start();
-        } else {
-            System.out.println("User canceled deletion");
+    public void onSearch() {
+        String query = this.searchField.getText().toLowerCase().trim();
+        if(query.isEmpty()) displayRepairs(allRepairs);
+        else {
+            List<RepairOrder> filteredOrders = this.allRepairs.stream()
+                    .filter(r -> String.valueOf(r.getId()).contains(query) ||
+                            r.getCustomerName().toLowerCase().contains(query) ||
+                            r.getEquipmentName().toLowerCase().contains(query) ||
+                            r.getStatusName().toLowerCase().contains(query))
+                    .toList();
+            displayRepairs(filteredOrders);
         }
     }
-    @FXML
-    public void handleEdit(ActionEvent event) {
-        RepairOrder selectedOrder = repairOrderTable.getSelectionModel().getSelectedItem();
-        if(selectedOrder == null) return;
-        openRepairOrderForm(selectedOrder);
+    private void loadRepairs() {
+        new Thread(() -> {
+            this.allRepairs = api.getRepairOrders();
+            Platform.runLater(() -> displayRepairs(allRepairs));
+        }).start();
+    }
+    private void displayRepairs(List<RepairOrder> orders) {
+        cardsContainer.getChildren().clear();
+        if(orders.isEmpty()) {
+            VBox emptyState = new VBox();
+            emptyState.getStyleClass().add("empty-state");
+            Label emptyIcon = new Label("🔧");
+            emptyIcon.getStyleClass().add("empty-state-icon");
+            Label emptyTitle = new Label("No repair orders found");
+            emptyTitle.getStyleClass().add("empty-state-title");
+            Label emptyText = new Label("Click '+ New Repair Order' to create your first repair");
+            emptyText.getStyleClass().add("empty-state-text");
+            emptyState.getChildren().addAll(emptyIcon, emptyTitle, emptyText);
+            cardsContainer.getChildren().add(emptyState);
+            return;
+        }
+        for(RepairOrder order : orders) {
+            VBox card = createRepairCard(order);
+            cardsContainer.getChildren().add(card);
+        }
+    }
+    private VBox createRepairCard(RepairOrder order) {
+        VBox card = new VBox();
+        card.getStyleClass().add("card");
+        Circle circle = new Circle(35);
+        circle.getStyleClass().add("profile-circle");
+        Label titleLabel = new Label("Repair #" + order.getId());
+        titleLabel.getStyleClass().add("card-title");
+        VBox infoContainer = new VBox();
+        infoContainer.getStyleClass().add("card-info");
+        HBox customerRow = new HBox();
+        customerRow.getStyleClass().add("info-row");
+        Label customerIcon = new Label("👤");
+        customerIcon.getStyleClass().add("info-icon");
+        Label customerText = new Label(order.getCustomer().getFullName());
+        customerText.getStyleClass().add("info-text");
+        customerRow.getChildren().addAll(customerIcon, customerText);
+        HBox equipmentRow = new HBox();
+        equipmentRow.getStyleClass().add("info-row");
+        Label equipmentIcon = new Label("📦");
+        equipmentIcon.getStyleClass().add("info-icon");
+        Label equipmentText = new Label(order.getEquipmentName());
+        equipmentText.getStyleClass().add("info-text");
+        equipmentRow.getChildren().addAll(equipmentIcon, equipmentText);
+        infoContainer.getChildren().addAll(customerRow, equipmentRow);
+//        if (repair.getInvoice() != null) {
+//            HBox invoiceRow = new HBox();
+//            invoiceRow.getStyleClass().add("info-row");
+//            Label invoiceIcon = new Label("📄");
+//            invoiceIcon.getStyleClass().add("info-icon");
+//            Label invoiceText = new Label("Invoice #" + repair.getInvoice().getInvoiceNumber());
+//            invoiceText.getStyleClass().add("info-text");
+//            invoiceRow.getChildren().addAll(invoiceIcon, invoiceText);
+//            infoContainer.getChildren().add(invoiceRow);
+//        } FOR INVOICE LINK LATER
+        Label statusBadge = new Label(order.getStatusName());
+        statusBadge.getStyleClass().addAll("status-badge", getStatusClass(order.getStatusName()));
+        Button detailsButton = new Button("View Details");
+        detailsButton.getStyleClass().add("card-action-button");
+        detailsButton.setOnAction(e -> onViewDetails(order));
+        card.getChildren().addAll(circle, titleLabel, infoContainer, statusBadge, detailsButton);
+        return card;
+    }
+    private String getStatusClass(String status) {
+        return switch (status) {
+            case "COMPLETED" -> "status-success";
+            case "IN_PROGRESS" -> "status-warning";
+            case "CANCELLED" -> "status-danger";
+            default -> "status-neutral";
+        };
+    }
+    private void onViewDetails(RepairOrder order) {
+        openRepairOrderForm(order);
     }
     private void openRepairOrderForm(RepairOrder order) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/tamv/systema/frontend/repair-order-form.fxml"));
             Parent popup = fxmlLoader.load();
             RepairOrderFormController controller = fxmlLoader.getController();
-            controller.setRepairOrderData(order);
             controller.setApi(this.api);
-            controller.setOnSaveSuccess(this::refreshTable);
+            controller.setRepairOrderData(order);
+            controller.setOnSaveSuccess(this::refreshRepairs);
             Stage stage = new Stage();
             stage.setTitle(order == null ? "New Order" : "Edit Order");
             stage.setScene(new Scene(popup));
@@ -132,11 +151,7 @@ public class RepairOrderViewController {
             e.printStackTrace();
         }
     }
-    private void refreshTable() {
-        new Thread(() -> {
-            List<RepairOrder> orders = api.getRepairOrders();
-            ObservableList<RepairOrder> observableList = FXCollections.observableArrayList(orders);
-            Platform.runLater(() -> this.repairOrderTable.setItems(observableList));
-        }).start();
+    private void refreshRepairs() {
+        loadRepairs();
     }
 }
