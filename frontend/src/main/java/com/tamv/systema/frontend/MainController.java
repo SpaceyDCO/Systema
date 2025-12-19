@@ -35,7 +35,7 @@ public class MainController {
     }
     @FXML
     public void initialize() {
-        currentSelectedButton = homeButton;
+        setSelectedButton(homeButton);
         loadView("dashboard-view.fxml");
     }
     @FXML

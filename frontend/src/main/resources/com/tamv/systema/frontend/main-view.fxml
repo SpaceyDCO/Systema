@@ -16,7 +16,7 @@
                </padding></Label>
             </HBox>
             <VBox alignment="CENTER" prefWidth="190.0" spacing="30.0" styleClass="nav-buttons">
-                <Button fx:id="homeButton" onAction="#onHomeClicked" styleClass="nav-button selected" text="🏠 Home" />
+                <Button fx:id="homeButton" onAction="#onHomeClicked" styleClass="nav-button" text="🏠 Home" />
 
                 <Button fx:id="customersButton" onAction="#handleCustomersButton" styleClass="nav-button" text="👥 Customers" />
 
