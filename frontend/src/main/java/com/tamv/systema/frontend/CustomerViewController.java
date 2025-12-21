@@ -4,19 +4,16 @@ import com.tamv.systema.frontend.API.ApiService;
 import com.tamv.systema.frontend.model.Customer;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
@@ -24,8 +21,6 @@ import javafx.util.Duration;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class CustomerViewController {
     private final ApiService api;
@@ -34,8 +29,10 @@ public class CustomerViewController {
     @FXML
     public FlowPane cardsContainer;
     private List<Customer> allCustomers;
-    public CustomerViewController(ApiService api) {
+    private StackPane contentArea;
+    public CustomerViewController(ApiService api, StackPane contentArea) {
         this.api = api;
+        this.contentArea = contentArea;
     }
     @FXML
     public void initialize() {
@@ -44,11 +41,11 @@ public class CustomerViewController {
     }
     @FXML
     public void onViewDetails(Customer customer) {
-        openCustomerForm(customer);
+        loadDetailView(customer);
     }
     @FXML
     public void onAddCustomer() {
-        openCustomerForm(null);
+        loadDetailView(null);
     }
     @FXML
     public void onSearch() {
@@ -122,26 +119,19 @@ public class CustomerViewController {
         card.getChildren().addAll(circle, nameLabel, contactInfo, detailsButton);
         return card;
     }
-    private void openCustomerForm(Customer customer) {
+    private void loadDetailView(Customer customer) {
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/tamv/systema/frontend/customer-form.fxml"));
-            Parent popup = fxmlLoader.load();
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/tamv/systema/frontend/customer-detail-view.fxml"));
+            fxmlLoader.setControllerFactory(controllerClass -> new CustomerFormController(this.api));
+            Parent detailView = fxmlLoader.load();
             CustomerFormController controller = fxmlLoader.getController();
-            controller.setCustomerData(customer);
-            controller.setApi(this.api);
-            controller.setOnSaveSuccess(this::refreshCustomers);
-            Stage stage = new Stage();
-            stage.setTitle(customer == null ? "New Customer" : "Edit Customer");
-            stage.setScene(new Scene(popup));
-            stage.setAlwaysOnTop(true);
-            stage.setResizable(false);
-            stage.showAndWait();
+            controller.setContentArea(contentArea);
+            controller.setCustomer(customer);
+            contentArea.getChildren().clear();
+            contentArea.getChildren().add(detailView);
         }catch(IOException e) {
             e.printStackTrace();
         }
-    }
-    private void refreshCustomers() {
-        loadCustomers();
     }
     private void copyToClipboard(String text, Label label) {
         Clipboard clipboard = Clipboard.getSystemClipboard();
