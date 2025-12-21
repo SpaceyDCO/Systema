@@ -29,7 +29,7 @@ public class CustomerViewController {
     @FXML
     public FlowPane cardsContainer;
     private List<Customer> allCustomers;
-    private StackPane contentArea;
+    private final StackPane contentArea;
     public CustomerViewController(ApiService api, StackPane contentArea) {
         this.api = api;
         this.contentArea = contentArea;
