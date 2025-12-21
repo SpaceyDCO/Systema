@@ -95,7 +95,7 @@ public class ApiService {
             return false;
         }
     }
-    public Customer updateCustomer(Long id, Customer customer) {
+    public boolean updateCustomer(Long id, Customer customer) {
         String jsonBody = gson.toJson(customer);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(API_BASE_URL + "/customers/" + id))
@@ -105,15 +105,10 @@ public class ApiService {
                 .build();
         try {
             HttpResponse<String> response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
-            if(response.statusCode() == 200) {
-                return gson.fromJson(response.body(), Customer.class);
-            }else {
-                System.err.println("Failed to update customer. Status: " + response.statusCode());
-                return null;
-            }
+            return response.statusCode() == 200;
         }catch(Exception e) {
             e.printStackTrace();
-            return null;
+            return false;
         }
     }
     public List<Product> getProducts() {
