@@ -3,14 +3,11 @@ package com.tamv.systema.frontend;
 import com.tamv.systema.frontend.API.ApiService;
 import com.tamv.systema.frontend.model.Product;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
-import lombok.Setter;
 
 import java.io.IOException;
 import java.math.BigDecimal;
