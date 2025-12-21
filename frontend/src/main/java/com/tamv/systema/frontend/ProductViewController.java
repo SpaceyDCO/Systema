@@ -13,6 +13,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
@@ -27,8 +28,10 @@ public class ProductViewController {
     @FXML
     public FlowPane cardsContainer;
     private List<Product> allProducts;
-    public ProductViewController(ApiService api) {
+    private StackPane contentArea;
+    public ProductViewController(ApiService api, StackPane contentArea) {
         this.api = api;
+        this.contentArea = contentArea;
     }
 
     @FXML
@@ -108,24 +111,17 @@ public class ProductViewController {
     }
     private void openProductForm(Product product) {
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/tamv/systema/frontend/product-form.fxml"));
-            Parent popup = fxmlLoader.load();
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/tamv/systema/frontend/product-detail-view.fxml"));
+            fxmlLoader.setControllerFactory(controlledClass -> new ProductFormController(this.api, this.contentArea));
+            Parent detailView = fxmlLoader.load();
             ProductFormController controller = fxmlLoader.getController();
-            controller.setProductData(product);
-            controller.setApi(this.api);
-            controller.setOnSaveSuccess(this::refreshProducts);
-            Stage stage = new Stage();
-            stage.setTitle(product == null ? "New Product" : "Edit Product");
-            stage.setScene(new Scene(popup));
-            stage.setAlwaysOnTop(true);
-            stage.setResizable(false);
-            stage.showAndWait();
+            controller.setProduct(product);
+            this.contentArea.getChildren().clear();
+            this.contentArea.getChildren().add(detailView);
+
         }catch(IOException e) {
             e.printStackTrace();
         }
-    }
-    private void refreshProducts() {
-        loadProducts();
     }
     private void loadProducts() {
         new Thread(() -> {
