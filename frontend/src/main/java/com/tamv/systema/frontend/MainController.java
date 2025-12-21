@@ -75,11 +75,11 @@ public class MainController {
                 if(controllerClass == CustomerViewController.class) {
                     return new CustomerViewController(this.api, this.contentArea);
                 }if(controllerClass == ProductViewController.class) {
-                    return new ProductViewController(this.api);
+                    return new ProductViewController(this.api, this.contentArea);
                 }if(controllerClass == RepairOrderViewController.class) {
-                    return new RepairOrderViewController(this.api);
+                    return new RepairOrderViewController(this.api, this.contentArea);
                 }if(controllerClass == InvoiceViewController.class) {
-                    return new InvoiceViewController(this.api);
+                    return new InvoiceViewController(this.api, this.contentArea);
                 }else {
                     try {
                         return controllerClass.getDeclaredConstructor().newInstance();
