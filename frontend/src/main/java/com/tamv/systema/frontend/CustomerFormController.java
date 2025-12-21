@@ -28,7 +28,7 @@ public class CustomerFormController {
     private TextField emailField;
     @FXML
     private TextField phoneField;
-    private ApiService api;
+    private final ApiService api;
     private Customer customer;
     @Setter
     private StackPane contentArea;
