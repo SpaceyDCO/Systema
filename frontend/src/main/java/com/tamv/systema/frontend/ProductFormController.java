@@ -8,6 +8,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
+import lombok.Setter;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -15,7 +16,8 @@ import java.util.Optional;
 
 public class ProductFormController {
     private final ApiService api;
-    private final StackPane contentArea;
+    @Setter
+    private StackPane contentArea;
     @FXML
     public Label errorLabel;
     @FXML
@@ -31,9 +33,8 @@ public class ProductFormController {
     @FXML
     public Button deleteButton;
     private Product product;
-    public ProductFormController(ApiService api, StackPane contentArea) {
+    public ProductFormController(ApiService api) {
         this.api = api;
-        this.contentArea = contentArea;
     }
     @FXML
     public void onBack() {
