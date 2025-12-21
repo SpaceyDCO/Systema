@@ -12,6 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
@@ -27,9 +28,10 @@ public class RepairOrderViewController {
     @FXML
     public FlowPane cardsContainer;
     private List<RepairOrder> allRepairs;
-
-    public RepairOrderViewController(ApiService api) {
+    private StackPane contentArea;
+    public RepairOrderViewController(ApiService api, StackPane contentArea) {
         this.api = api;
+        this.contentArea = contentArea;
     }
     @FXML
     public void initialize() {

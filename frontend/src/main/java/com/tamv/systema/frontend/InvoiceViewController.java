@@ -12,6 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
@@ -28,9 +29,11 @@ public class InvoiceViewController {
     public FlowPane cardsContainer;
     private List<Invoice> allInvoices;
     private String currentFilter = "ALL";
+    private StackPane contentArea;
 
-    public InvoiceViewController(ApiService api) {
+    public InvoiceViewController(ApiService api, StackPane contentArea) {
         this.api = api;
+        this.contentArea = contentArea;
     }
     @FXML
     public void initialize() {
