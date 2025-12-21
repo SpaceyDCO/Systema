@@ -5,7 +5,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
 import javafx.scene.layout.StackPane;
 import lombok.Setter;
@@ -74,7 +73,7 @@ public class MainController {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(fullPath));
             fxmlLoader.setControllerFactory(controllerClass -> {
                 if(controllerClass == CustomerViewController.class) {
-                    return new CustomerViewController(this.api);
+                    return new CustomerViewController(this.api, this.contentArea);
                 }if(controllerClass == ProductViewController.class) {
                     return new ProductViewController(this.api);
                 }if(controllerClass == RepairOrderViewController.class) {
@@ -92,10 +91,6 @@ public class MainController {
             Parent view = fxmlLoader.load();
             contentArea.getChildren().clear();
             contentArea.getChildren().add(view);
-//            AnchorPane.setTopAnchor(view, 0.0);
-//            AnchorPane.setBottomAnchor(view, 0.0);
-//            AnchorPane.setLeftAnchor(view, 0.0);
-//            AnchorPane.setRightAnchor(view, 0.0);
         }catch(IOException e) {
             e.printStackTrace();
         }
