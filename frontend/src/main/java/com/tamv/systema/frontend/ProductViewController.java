@@ -26,7 +26,7 @@ public class ProductViewController {
     @FXML
     public FlowPane cardsContainer;
     private List<Product> allProducts;
-    private StackPane contentArea;
+    private final StackPane contentArea;
     public ProductViewController(ApiService api, StackPane contentArea) {
         this.api = api;
         this.contentArea = contentArea;
@@ -110,9 +110,10 @@ public class ProductViewController {
     private void openProductForm(Product product) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/tamv/systema/frontend/product-detail-view.fxml"));
-            fxmlLoader.setControllerFactory(controlledClass -> new ProductFormController(this.api, this.contentArea));
+            fxmlLoader.setControllerFactory(controlledClass -> new ProductFormController(this.api));
             Parent detailView = fxmlLoader.load();
             ProductFormController controller = fxmlLoader.getController();
+            controller.setContentArea(this.contentArea);
             controller.setProduct(product);
             this.contentArea.getChildren().clear();
             this.contentArea.getChildren().add(detailView);
