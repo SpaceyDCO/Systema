@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox styleClass="detail-view-container" stylesheets="@styles/shared-forms.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.tamv.systema.frontend.ProductFormController">
+    <HBox alignment="CENTER_LEFT" styleClass="detail-header">
+        <Button onAction="#onBack" styleClass="back-button" text="← Back to Products" />
+        <Region HBox.hgrow="ALWAYS" />
+        <Button fx:id="deleteButton" onAction="#onDelete" styleClass="danger-button" text="🗑 Delete" />
+    </HBox>
+    <ScrollPane fitToWidth="true" styleClass="form-scroll-pane" VBox.vgrow="ALWAYS">
+        <VBox spacing="20" styleClass="form-content">
+            <padding>
+                <Insets bottom="30" left="40" right="40" top="30" />
+            </padding>
+            <Label fx:id="titleLabel" styleClass="detail-title" text="Product Details" />
+            <VBox prefHeight="300.0" prefWidth="454.0" spacing="15" styleClass="form-section">
+                <VBox spacing="5">
+                    <Label styleClass="form-field-label" text="Name *" />
+                    <TextField fx:id="nameField" promptText="Enter product name" styleClass="form-field" />
+                </VBox>
+                <VBox spacing="5">
+                    <Label styleClass="form-field-label" text="Price *" />
+                    <TextField fx:id="priceField" promptText="Price per unit" styleClass="form-field" />
+                </VBox>
+                <VBox spacing="5">
+                    <Label styleClass="form-field-label" text="Category *" />
+                    <TextField fx:id="categoryField" promptText="&quot;Service&quot;, &quot;Part&quot;, &quot;Equipment&quot;" styleClass="form-field" />
+                </VBox>
+                <VBox spacing="5">
+                    <Label styleClass="form-field-label" text="Description *" />
+                    <TextArea fx:id="descriptionArea" promptText="Enter a description for this product" styleClass="form-field" />
+                </VBox>
+            </VBox>
+            <Label fx:id="errorLabel" managed="false" styleClass="error-label" visible="false" wrapText="true" />
+            <HBox alignment="CENTER_LEFT" spacing="15" styleClass="form-actions">
+                <Button onAction="#onSave" styleClass="primary-button" text="Save Changes" />
+                <Button onAction="#onBack" styleClass="secondary-button" text="Cancel" />
+            </HBox>
+        </VBox>
+    </ScrollPane>
+</VBox>

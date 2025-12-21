@@ -5,16 +5,22 @@ import com.tamv.systema.frontend.model.Product;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.control.*;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import lombok.Setter;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Optional;
 
 public class ProductFormController {
+    private final ApiService api;
+    private final StackPane contentArea;
+    @FXML
+    public Label errorLabel;
     @FXML
     public TextField nameField;
     @FXML
@@ -22,89 +28,133 @@ public class ProductFormController {
     @FXML
     public TextField categoryField;
     @FXML
-    public TextArea descriptionField;
+    public TextArea descriptionArea;
     @FXML
-    public Label errorLabel;
+    public Label titleLabel;
     @FXML
-    public Button saveButton;
+    public Button deleteButton;
+    private Product product;
+    public ProductFormController(ApiService api, StackPane contentArea) {
+        this.api = api;
+        this.contentArea = contentArea;
+    }
     @FXML
-    public Button cancelButton;
-    @Setter
-    private Runnable onSaveSuccess;
-    @Setter
-    private ApiService api;
-    private Product currentProduct;
+    public void onBack() {
+        goBack();
+    }
     @FXML
-    public void handleSave(ActionEvent event) {
-        String name = this.nameField.getText();
-        String priceText = this.priceField.getText();
-        String description = this.descriptionField.getText();
-        String category = this.categoryField.getText();
-        if(name == null || name.trim().isEmpty()) {
-            this.errorLabel.setText("Product name is required.");
-            return;
-        }
-        if(priceText == null || priceText.trim().isEmpty()) {
-            this.errorLabel.setText("Price is required.");
-            return;
-        }
-        BigDecimal price;
-        try {
-            price = new BigDecimal(priceText);
-            if(price.compareTo(BigDecimal.ZERO) <= 0) {
-                this.errorLabel.setText("Price must be positive.");
-                return;
-            }
-        }catch(NumberFormatException e) {
-            this.errorLabel.setText("Invalid price format.");
-            return;
-        }
-        if(category == null || category.trim().isEmpty()) {
-            this.errorLabel.setText("Category is required.");
-            return;
-        }
-        this.errorLabel.setText("");
-        final boolean isEditing = this.currentProduct != null && this.currentProduct.getId() != null;
-        if(this.currentProduct == null) {
-            this.currentProduct = new Product();
-        }
-        this.currentProduct.setName(name);
-        this.currentProduct.setDescription(description);
-        this.currentProduct.setCategory(category);
-        this.currentProduct.setDefaultPrice(price);
-        this.saveButton.setDisable(true);
-        this.cancelButton.setDisable(true);
+    public void onSave() {
+        if(!validateFields()) return;
+        String name = this.nameField.getText().trim();
+        String price = this.priceField.getText().trim();
+        String category = this.categoryField.getText().trim();
+        String description = this.descriptionArea.getText().trim();
         new Thread(() -> {
-            Product savedProduct = isEditing ? api.updateProduct(this.currentProduct.getId(), this.currentProduct) : api.createProduct(this.currentProduct);
-            Platform.runLater(() -> {
-                if(savedProduct != null) {
-                    if(this.onSaveSuccess != null) {
-                        this.onSaveSuccess.run();
-                    }
-                    Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
-                    stage.close();
+            try {
+                boolean success;
+                if(product == null || product.getId() == null) {
+                    Product newProduct = new Product();
+                    newProduct.setName(name);
+                    newProduct.setDefaultPrice(new BigDecimal(price));
+                    newProduct.setCategory(category);
+                    newProduct.setDescription(description);
+                    success = api.createProduct(newProduct) != null;
                 }else {
-                    this.errorLabel.setText("Failed to save product, please try again...");
-                    this.saveButton.setDisable(false);
-                    this.cancelButton.setDisable(false);
+                    product.setName(name);
+                    product.setDefaultPrice(new BigDecimal(price));
+                    product.setCategory(category);
+                    product.setDescription(description);
+                    success = api.updateProduct(product.getId(), product);
                 }
-            });
+                Platform.runLater(() -> {
+                    if(success) goBack();
+                    else showError("Failed to save product. Please try again.");
+                });
+            }catch (Exception e) {
+                Platform.runLater(() -> showError("An unexpected error happened while trying to save the product. Please contact an administrator"));
+            }
         }).start();
     }
     @FXML
-    public void handleCancel(ActionEvent event) {
-        Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
-        stage.close();
+    public void onDelete() {
+        if(product == null || product.getId() == null) return; //Fail-safe
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Delete Product");
+        alert.setHeaderText("Are you sure you want to delete this product?");
+        alert.setContentText("Product: " + product.getName() + "\nThis action cannot be undone.");
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            new Thread(() -> {
+                boolean success = api.deleteProduct(product.getId());
+                Platform.runLater(() -> {
+                    if (success) goBack();
+                    else showError("Failed to delete product. Please try again.");
+                });
+            }).start();
+        }
     }
-    public void setProductData(Product product) {
-        this.currentProduct = product;
-        if(product != null) {
-            this.nameField.setText(product.getName());
-            this.categoryField.setText(product.getCategory());
-            this.descriptionField.setText(product.getDescription());
-            if(product.getDefaultPrice() != null) {
-                this.priceField.setText(product.getDefaultPrice().toString());
-            }
+    public void setProduct(Product product) {
+        this.product = product;
+        if(product == null || product.getId() == null) {
+            this.titleLabel.setText("New Product");
+            this.deleteButton.setVisible(false);
+            this.deleteButton.setManaged(false);
+        }else {
+            this.titleLabel.setText("Edit Product");
+            populateFields();
+        }
+    }
+    private void populateFields() {
+        this.nameField.setText(product.getName());
+        this.priceField.setText(product.getDefaultPrice().toString());
+        this.categoryField.setText(product.getCategory());
+        this.descriptionArea.setText(product.getDescription());
+    }
+    private boolean validateFields() {
+        String name = this.nameField.getText().trim();
+        String price = this.priceField.getText().trim();
+        String category = this.categoryField.getText().trim();
+        String description = this.descriptionArea.getText().trim();
+        if(name.isEmpty()) {
+            showError("Name is required");
+            return false;
+        }
+        if(price.isEmpty()) {
+            showError("Price is required");
+            return false;
+        }
+        try {
+            new BigDecimal(price);
+        }catch (NumberFormatException e) {
+            showError("Invalid price formatting. Do not include currency symbols");
+            return false;
+        }
+        if(category.isEmpty()) {
+            showError("Category is required");
+            return false;
+        }
+        if(description.isEmpty()) {
+            showError("Description is required");
+            return false;
+        }
+        this.errorLabel.setVisible(false);
+        this.errorLabel.setManaged(false);
+        return true;
+    }
+    private void showError(String error) {
+        this.errorLabel.setText(error);
+        this.errorLabel.setVisible(true);
+        this.errorLabel.setManaged(true);
+    }
+    private void goBack() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/tamv/systema/frontend/product-view.fxml"));
+            loader.setControllerFactory(controllerClass -> new ProductViewController(this.api, this.contentArea));
+            Parent productView = loader.load();
+            contentArea.getChildren().clear();
+            contentArea.getChildren().add(productView);
+        }catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
