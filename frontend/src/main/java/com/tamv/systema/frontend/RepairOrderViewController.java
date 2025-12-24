@@ -5,8 +5,8 @@ import com.tamv.systema.frontend.model.RepairOrder;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -137,18 +137,16 @@ public class RepairOrderViewController {
     }
     private void openRepairOrderForm(RepairOrder order) {
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/tamv/systema/frontend/repair-order-form.fxml"));
-            Parent popup = fxmlLoader.load();
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/tamv/systema/frontend/repair-order-detail-view.fxml"));
+            fxmlLoader.setControllerFactory(controllerClass -> new RepairOrderFormController(this.api));
+            Parent view = fxmlLoader.load();
             RepairOrderFormController controller = fxmlLoader.getController();
-            controller.setApi(this.api);
-            controller.setRepairOrderData(order);
-            controller.setOnSaveSuccess(this::refreshRepairs);
+            controller.setContentArea(this.contentArea);
+            controller.setRepairOrder(order);
             Stage stage = new Stage();
             stage.setTitle(order == null ? "New Order" : "Edit Order");
-            stage.setScene(new Scene(popup));
-            stage.setAlwaysOnTop(true);
-            stage.setResizable(false);
-            stage.showAndWait();
+            this.contentArea.getChildren().clear();
+            this.contentArea.getChildren().add(view);
         }catch(IOException e) {
             e.printStackTrace();
         }
