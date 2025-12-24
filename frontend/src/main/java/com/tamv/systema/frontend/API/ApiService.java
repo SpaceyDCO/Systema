@@ -265,6 +265,10 @@ public class ApiService {
             return false;
         }
     }
+    //TODO: Optimize with specific endpoint
+    public boolean updateRepairOrderStatusAndNotes(Long orderId, Long statusId, String notes) {
+        return updateRepairOrderStatus(orderId, statusId) && updateRepairOrderNotes(orderId, notes);
+    }
     public boolean updateRepairOrderNotes(Long orderId, String technicianNotes) {
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("technicianNotes", technicianNotes);
