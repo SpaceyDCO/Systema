@@ -1,146 +1,155 @@
 package com.tamv.systema.frontend;
 
 import com.tamv.systema.frontend.API.ApiService;
+import com.tamv.systema.frontend.Utils.General;
 import com.tamv.systema.frontend.model.Customer;
 import com.tamv.systema.frontend.model.RepairOrder;
 import com.tamv.systema.frontend.model.Status;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
-import javafx.stage.Stage;
+import javafx.scene.layout.StackPane;
 import lombok.Setter;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 public class RepairOrderFormController {
     @FXML
+    public ComboBox<Status> statusComboBox;
+    @FXML
     public ComboBox<Customer> customerComboBox;
     @FXML
-    public TextField equipmentNameField;
+    public Label titleLabel;
+    @FXML
+    public Button deleteButton;
+    @FXML
+    public TextField equipmentField;
     @FXML
     public TextField serialNumberField;
     @FXML
-    public TextArea reportedIssueField;
+    public TextArea issueField;
     @FXML
-    public ComboBox<Status> statusComboBox;
-    @FXML
-    public TextArea technicianNotesField;
-    @FXML
-    public Button saveButton;
-    @FXML
-    public Button cancelButton;
+    public TextArea notesField;
     @FXML
     public Label errorLabel;
+    private RepairOrder order;
+    private final ApiService api;
     @Setter
-    private ApiService api;
-    @Setter
-    private Runnable onSaveSuccess;
-    private RepairOrder currentOrder;
-    @FXML
-    public void handleSave(ActionEvent event) {
-        Customer selectedCustomer = this.customerComboBox.getValue();
-        String equipmentName = this.equipmentNameField.getText();
-        String serialNumber = this.serialNumberField.getText();
-        String reportedIssue = this.reportedIssueField.getText();
-        Status selectedStatus = this.statusComboBox.getValue();
-        String technicianNotes = this.technicianNotesField.getText();
-        if (selectedCustomer == null) {
-            errorLabel.setText("Please select a customer.");
-            return;
-        }
-        if (equipmentName == null || equipmentName.trim().isEmpty()) {
-            errorLabel.setText("Equipment name is required.");
-            return;
-        }
-        if (serialNumber == null || serialNumber.trim().isEmpty()) {
-            errorLabel.setText("Serial number is required.");
-            return;
-        }
-        if (reportedIssue == null || reportedIssue.trim().isEmpty()) {
-            errorLabel.setText("Reported issue is required.");
-            return;
-        }
-        errorLabel.setText("");
-        final boolean isEditing = this.currentOrder != null && this.currentOrder.getId() != null;
-        this.saveButton.setDisable(true);
-        this.cancelButton.setDisable(true);
-        if(isEditing) {
-            new Thread(() -> {
-                boolean success = true;
-                if(selectedStatus != null && !selectedStatus.getId().equals(currentOrder.getStatus().getId())) {
-                    success = api.updateRepairOrderStatus(currentOrder.getId(), selectedStatus.getId());
-                }
-                if(success && technicianNotes != null && !technicianNotes.equals(currentOrder.getTechnicianNotes())) {
-                    success = api.updateRepairOrderNotes(currentOrder.getId(), technicianNotes);
-                }
-                final boolean finalSuccess = success;
-                Platform.runLater(() -> {
-                    if(finalSuccess) {
-                        if(this.onSaveSuccess != null) onSaveSuccess.run();
-                        Stage stage = (Stage) this.saveButton.getScene().getWindow();
-                        stage.close();
-                    }else {
-                        this.errorLabel.setText("Failed to update repair order. Please try again.");
-                        this.saveButton.setDisable(false);
-                        this.cancelButton.setDisable(false);
-                    }
-                });
-            }).start();
-        }else {
-            new Thread(() -> {
-                RepairOrder savedOrder = api.createRepairOrder(selectedCustomer.getId(), equipmentName, serialNumber, reportedIssue);
-                Platform.runLater(() -> {
-                    if(savedOrder != null) {
-                        if(this.onSaveSuccess != null) this.onSaveSuccess.run();
-                        Stage stage = (Stage) this.saveButton.getScene().getWindow();
-                        stage.close();
-                    }else {
-                        this.errorLabel.setText("Failed to create repair order. Please try again.");
-                        this.saveButton.setDisable(false);
-                        this.cancelButton.setDisable(false);
-                    }
-                });
-            }).start();
-        }
+    private StackPane contentArea;
+    private List<Customer> allCustomers;
+    public RepairOrderFormController(ApiService api) {
+        this.api = api;
     }
     @FXML
-    public void handleCancel(ActionEvent event) {
-        Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
-        stage.close();
-    }
-    public void setRepairOrderData(RepairOrder order) {
-        this.currentOrder = order;
-        loadCustomers();
+    public void initialize() {
         loadStatuses();
-        final boolean isEditing = order != null && order.getId() != null;
-        if(isEditing) {
-            this.customerComboBox.setValue(order.getCustomer());
-            this.customerComboBox.setDisable(true);
-            this.equipmentNameField.setText(order.getEquipmentName());
-            this.equipmentNameField.setDisable(true);
-            this.serialNumberField.setText(order.getSerialNumber());
-            this.serialNumberField.setDisable(true);
-            this.reportedIssueField.setText(order.getReportedIssue());
-            this.reportedIssueField.setDisable(true);
-            this.statusComboBox.setValue(order.getStatus());
-            this.technicianNotesField.setText(order.getTechnicianNotes());
-        }else {
-            this.customerComboBox.setDisable(false);
-            this.equipmentNameField.setDisable(false);
-            this.serialNumberField.setDisable(false);
-            this.reportedIssueField.setDisable(false);
-            this.statusComboBox.setDisable(true);
-            this.technicianNotesField.setDisable(true);
+        loadCustomers();
+    }
+    @FXML
+    public void onBack() {
+        goBack();
+    }
+    @FXML
+    public void onSave() {
+        if(!validateFields()) return;
+        Customer customer = this.customerComboBox.getValue();
+        String equipmentDescription = this.equipmentField.getText();
+        String serialNumber = this.serialNumberField.getText();
+        String issueDescription = this.issueField.getText();
+        Status status = this.statusComboBox.getValue();
+        String technicianNotes = this.notesField.getText();
+        new Thread(() -> {
+            try {
+                boolean success;
+                if(order == null || order.getId() == null)
+                    success = api.createRepairOrder(customer.getId(), equipmentDescription, serialNumber, issueDescription) != null;
+                else success = api.updateRepairOrderStatusAndNotes(order.getId(), status.getId(), technicianNotes);
+                Platform.runLater(() -> {
+                    if(success) goBack();
+                    else General.showError(this.errorLabel, "Failed to save repairOrder, please try again or contact an admin.");
+                });
+            }catch (Exception e) {
+                General.showError(this.errorLabel, "There has been an error while trying to save the Repair Order. Please contact an admin.");
+                e.printStackTrace();
+            }
+        }).start();
+    }
+    @FXML
+    public void onDelete() {
+        if(order == null || order.getId() == null) return;
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Delete Repair Order");
+        alert.setHeaderText("Are you sure you want to delete this repair order?");
+        alert.setContentText("Order for: " + order.getCustomerName() + "\nID: " + order.getId() + "\nThis action cannot be undone.");
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            new Thread(() -> {
+                boolean success = api.deleteRepairOrder(order.getId());
+                Platform.runLater(() -> {
+                    if (success) goBack();
+                    else General.showError(this.errorLabel, "Failed to delete product. Please try again.");
+                });
+            }).start();
         }
+    }
+    protected void setRepairOrder(RepairOrder order) {
+        this.order = order;
+        if(order == null) {
+            this.titleLabel.setText("New Repair Order");
+            this.deleteButton.setVisible(false);
+            this.deleteButton.setManaged(false);
+            this.statusComboBox.setDisable(true);
+        }else {
+            this.titleLabel.setText("Edit Repair Order #" + this.order.getId());
+            populateFields();
+            this.equipmentField.setDisable(true);
+            this.serialNumberField.setDisable(true);
+            this.issueField.setDisable(true);
+            this.customerComboBox.setDisable(true);
+        }
+    }
+    private boolean validateFields() {
+        Customer customer = this.customerComboBox.getValue();
+        String equipmentDescription = this.equipmentField.getText();
+        String issueDescription = this.issueField.getText();
+        if(customer == null) {
+            General.showError(this.errorLabel, "Customer is required.");
+            return false;
+        }
+        if(equipmentDescription.trim().isEmpty()) {
+            General.showError(this.errorLabel, "Equipment description is required.");
+            return false;
+        }
+        if(issueDescription.trim().isEmpty()) {
+            General.showError(this.errorLabel, "Issue description is required.");
+            return false;
+        }
+        this.errorLabel.setText("");
+        this.errorLabel.setVisible(false);
+        this.errorLabel.setManaged(false);
+        return true;
+    }
+    private void populateFields() {
+        this.equipmentField.setText(this.order.getEquipmentName());
+        this.serialNumberField.setText(this.order.getSerialNumber());
+        this.issueField.setText(this.order.getReportedIssue());
+        if(this.order.getTechnicianNotes() != null && !this.order.getTechnicianNotes().isEmpty()) this.notesField.setText(this.order.getTechnicianNotes());
+        this.statusComboBox.setValue(this.order.getStatus());
     }
     private void loadCustomers() {
         new Thread(() -> {
-            List<Customer> customers = api.getCustomers();
-            ObservableList<Customer> observableList = FXCollections.observableArrayList(customers);
-            Platform.runLater(() -> this.customerComboBox.setItems(observableList));
+            allCustomers = api.getCustomers();
+            ObservableList<Customer> observableList = FXCollections.observableArrayList(allCustomers);
+            Platform.runLater(() -> {
+                this.customerComboBox.setItems(observableList);
+                if(order != null && order.getCustomer() != null) this.customerComboBox.setValue(order.getCustomer());
+            });
         }).start();
     }
     private void loadStatuses() {
@@ -152,5 +161,22 @@ public class RepairOrderFormController {
             ObservableList<Status> observableList = FXCollections.observableArrayList(repairStatuses);
             Platform.runLater(() -> this.statusComboBox.setItems(observableList));
         }).start();
+    }
+//    private void loadStatuses() {
+//        General.loadEntities(api::getStatuses, entityList -> {
+//            ObservableList<Status> observableList = FXCollections.observableArrayList(entityList);
+//            this.statusComboBox.setItems(observableList);
+//        });
+//    }
+    private void goBack() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/tamv/systema/frontend/repair-order-view.fxml"));
+            loader.setControllerFactory(controllerClass -> new RepairOrderViewController(this.api, this.contentArea));
+            Parent repairView = loader.load();
+            contentArea.getChildren().clear();
+            contentArea.getChildren().add(repairView);
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
