@@ -171,17 +171,14 @@ public class InvoiceViewController {
     }
     private void openInvoiceForm(Invoice invoice) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/tamv/systema/frontend/invoice-form.fxml"));
-            Parent popup = loader.load();
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/tamv/systema/frontend/invoice-detail-view.fxml"));
+            loader.setControllerFactory(controllerClass -> new InvoiceFormController(this.api));
+            Parent view = loader.load();
             InvoiceFormController controller = loader.getController();
-            controller.setApi(this.api);
-            controller.setOnSaveSuccess(this::refreshInvoices);
-            controller.setInvoiceData(invoice);
-            Stage stage = new Stage();
-            stage.setTitle(invoice == null ? "New invoice" : "Edit invoice");
-            stage.setScene(new Scene(popup));
-            stage.setResizable(false);
-            stage.showAndWait();
+            controller.setContentArea(this.contentArea);
+            controller.setInvoice(invoice);
+            this.contentArea.getChildren().clear();
+            this.contentArea.getChildren().add(view);
         }catch (IOException e) {
             e.printStackTrace();
         }
