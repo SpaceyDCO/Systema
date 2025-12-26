@@ -93,7 +93,7 @@ public class RepairOrderFormController {
                 boolean success = api.deleteRepairOrder(order.getId());
                 Platform.runLater(() -> {
                     if (success) goBack();
-                    else General.showError(this.errorLabel, "Failed to delete product. Please try again.");
+                    else General.showError(this.errorLabel, "Failed to delete invoice. Please try again.");
                 });
             }).start();
         }
