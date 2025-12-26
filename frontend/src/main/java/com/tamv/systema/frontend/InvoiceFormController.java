@@ -1,246 +1,282 @@
 package com.tamv.systema.frontend;
 
 import com.tamv.systema.frontend.API.ApiService;
+import com.tamv.systema.frontend.Utils.General;
 import com.tamv.systema.frontend.model.*;
 import javafx.application.Platform;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
-import javafx.stage.Stage;
+import javafx.scene.layout.StackPane;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class InvoiceFormController {
     @FXML
-    private ComboBox<Customer> customerComboBox;
+    public DatePicker invoiceDatePicker;
+    private final ApiService api;
     @FXML
-    private DatePicker dueDatePicker;
+    public ComboBox<Status> statusComboBox;
     @FXML
-    private TableView<InvoiceLineItem> itemsTable;
+    public ComboBox<Customer> customerComboBox;
     @FXML
-    private TableColumn<InvoiceLineItem, Product> productColumn;
+    public Label titleLabel;
     @FXML
-    private TableColumn<InvoiceLineItem, Integer> quantityColumn;
+    public Button deleteButton;
     @FXML
-    private TableColumn<InvoiceLineItem, BigDecimal> priceColumn;
+    public Label subtotalLabel;
     @FXML
-    private TableColumn<InvoiceLineItem, BigDecimal> totalColumn;
+    public Label totalLabel;
     @FXML
-    private Button addItemButton;
+    public TableView<LineItemRow> lineItemsTable;
     @FXML
-    private Button removeItemButton;
+    public TableColumn<LineItemRow, String> productColumn;
     @FXML
-    private Label totalLabel;
+    public TableColumn<LineItemRow, String> descriptionColumn;
     @FXML
-    private GridPane statusGrid;
+    public TableColumn<LineItemRow, Integer> quantityColumn;
     @FXML
-    private ComboBox<Status> statusComboBox;
+    public TableColumn<LineItemRow, Double> priceColumn;
     @FXML
-    private Label errorLabel;
+    public TableColumn<LineItemRow, Double> totalColumn;
     @FXML
-    private Button saveButton;
+    public TableColumn<LineItemRow, Void> actionsColumn;
     @FXML
-    private Button cancelButton;
-    private Invoice currentInvoice;
-    private ObservableList<InvoiceLineItem> lineItems;
-    private List<Product> availableProducts;
+    public Label errorLabel;
+    private Invoice invoice;
     @Setter
-    private ApiService api;
-    @Setter
-    private Runnable onSaveSuccess;
+    private StackPane contentArea;
+    private List<Product> allProducts;
+    private final ObservableList<LineItemRow> lineItems;
+    public InvoiceFormController(ApiService api) {
+        this.api = api;
+        this.lineItems = FXCollections.observableArrayList();
+    }
     @FXML
     public void initialize() {
-        lineItems = FXCollections.observableArrayList();
-        itemsTable.setItems(lineItems);
-        productColumn.setCellValueFactory(cellData ->
-                new SimpleObjectProperty<>(cellData.getValue().product()));
-        this.quantityColumn.setCellValueFactory(cellData ->
-                new SimpleObjectProperty<>(cellData.getValue().quantity()));
-        this.priceColumn.setCellValueFactory(cellData ->
-                new SimpleObjectProperty<>(cellData.getValue().price()));
-        this.priceColumn.setCellFactory(column -> new TableCell<>() {
-            @Override
-            protected void updateItem(BigDecimal price, boolean empty) {
-                super.updateItem(price, empty);
-                if (empty || price == null) setText(null);
-                else setText(String.format("$ %.2f", price));
-            }
-        });
-        this.totalColumn.setCellValueFactory(cellData ->
-                new SimpleObjectProperty<>(cellData.getValue().getLineTotal()));
-        this.totalColumn.setCellFactory(column -> new TableCell<>() {
-            @Override
-            protected void updateItem(BigDecimal total, boolean empty) {
-                super.updateItem(total, empty);
-                if (empty || total == null) setText(null);
-                else setText(String.format("$ %.2f", total));
-            }
-        });
-        lineItems.addListener((ListChangeListener.Change<? extends InvoiceLineItem> c) -> {
-            updateTotalLabel();
-        });
-        this.removeItemButton.setDisable(true);
-        this.itemsTable.getSelectionModel().selectedItemProperty().addListener((observable, oldSelection, newSelection) -> {
-            this.removeItemButton.setDisable(newSelection == null);
-        });
+        loadStatuses();
+        loadCustomers();
+        loadProducts();
+        setupColumns();
+        this.invoiceDatePicker.setValue(LocalDate.now());
     }
     @FXML
-    public void handleAddItem() {
-        Dialog<InvoiceLineItem> dialog = new Dialog<>();
-        dialog.setTitle("Add Invoice Item");
-        dialog.setHeaderText("Select product and quantity");
-        ButtonType addButtonType = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
-        GridPane gridPane = new GridPane();
-        gridPane.setHgap(10);
-        gridPane.setVgap(10);
-        ComboBox<Product> productComboBox = new ComboBox<>();
-        productComboBox.setItems(FXCollections.observableArrayList(availableProducts));
-        productComboBox.setPromptText("Select product...");
-        Spinner<Integer> quantitySpinner = new Spinner<>(1, 100, 1);
-        quantitySpinner.setEditable(true);
-        gridPane.add(new Label("Product:"), 0, 0);
-        gridPane.add(productComboBox, 1, 0);
-        gridPane.add(new Label("Quantity:"), 0, 1);
-        gridPane.add(quantitySpinner, 1, 1);
-        dialog.getDialogPane().setContent(gridPane);
-        dialog.setResultConverter(dialogButton -> {
-            if(dialogButton == addButtonType) {
-                Product selectedProduct = productComboBox.getValue();
-                if(selectedProduct != null) {
-                    return new InvoiceLineItem(
-                            selectedProduct,
-                            quantitySpinner.getValue(),
-                            selectedProduct.getDefaultPrice()
-                    );
-                }
-            }
-            return null;
-        });
-        dialog.showAndWait().ifPresent(lineItems::add);
+    public void onBack() {
+        goBack();
     }
     @FXML
-    public void handleRemoveItem() {
-        InvoiceLineItem selected = itemsTable.getSelectionModel().getSelectedItem();
-        if(selected != null) lineItems.remove(selected);
-    }
-    @FXML
-    public void handleSave() {
-        Customer selectedCustomer = customerComboBox.getValue();
-        LocalDate dueDate = dueDatePicker.getValue();
-        if (selectedCustomer == null) {
-            errorLabel.setText("Please select a customer.");
-            return;
-        }
-        if (dueDate == null) {
-            errorLabel.setText("Please select a due date.");
-            return;
-        }
-        if (lineItems.isEmpty()) {
-            errorLabel.setText("Please add at least one item.");
-            return;
-        }
-        errorLabel.setText("");
-        final boolean isEditing = currentInvoice != null && currentInvoice.getId() != null;
-        this.saveButton.setDisable(true);
-        this.cancelButton.setDisable(true);
-        if(isEditing) {
-            Status selectedStatus = statusComboBox.getValue();
-            if(selectedStatus != null && !selectedStatus.getId().equals(currentInvoice.getStatus().getId())) {
-                new Thread(() -> {
-                    boolean success = api.updateInvoiceStatus(currentInvoice.getId(), selectedStatus.getId());
-                    Platform.runLater(() -> {
-                        if(success) {
-                            if(onSaveSuccess != null) onSaveSuccess.run();
-                            Stage stage = (Stage) saveButton.getScene().getWindow();
-                            stage.close();
-                        }else {
-                            errorLabel.setText("Failed to update invoice status.");
-                            saveButton.setDisable(false);
-                            cancelButton.setDisable(false);
-                        }
-                    });
-                }).start();
-            }else {
-                Stage stage = (Stage) saveButton.getScene().getWindow();
-                stage.close();
-            }
-        }else {
+    public void onDelete() {
+        if(invoice == null || invoice.getId() == null) return;
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Delete Invoice");
+        alert.setHeaderText("Are you sure you want to delete this Invoice?");
+        alert.setContentText("Invoice for: " + invoice.getCustomerName() + "\nID: #" + invoice.getId() + "\nThis action cannot be undone.");
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
             new Thread(() -> {
-                List<InvoiceItemRequest> items = new ArrayList<>();
-                for(InvoiceLineItem item : lineItems) {
-                    items.add(new InvoiceItemRequest(item.product().getId(), item.quantity()));
-                }
-                Invoice savedInvoice = api.createInvoice(selectedCustomer.getId(), items, dueDate);
+                boolean success = api.deleteInvoice(invoice.getId());
                 Platform.runLater(() -> {
-                    if(savedInvoice != null) {
-                        if(onSaveSuccess != null) onSaveSuccess.run();
-                        Stage stage = (Stage) this.saveButton.getScene().getWindow();
-                        stage.close();
-                    }else {
-                        errorLabel.setText("Failed to create invoice. Please try again.");
-                        saveButton.setDisable(false);
-                        cancelButton.setDisable(false);
-                    }
+                    if (success) goBack();
+                    else General.showError(this.errorLabel, "Failed to delete Invoice. Please try again.");
                 });
             }).start();
         }
     }
     @FXML
-    public void handleCancel(ActionEvent event) {
-        Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
-        stage.close();
+    public void onAddLineItem() {
+        ChoiceDialog<Product> dialog = new ChoiceDialog<>(null, allProducts);
+        dialog.setTitle("Add Line Item");
+        dialog.setHeaderText("Select a product to add");
+        dialog.setContentText("Product:");
+        Optional<Product> result = dialog.showAndWait();
+        result.ifPresent(product -> {
+            lineItems.add(new LineItemRow(
+                    product,
+                    product.getDescription(),
+                    1,
+                    product.getDefaultPrice()
+            ));
+            updateTotals();
+        });
     }
-    public void setInvoiceData(Invoice invoice) {
-        this.currentInvoice = invoice;
-        loadCustomers();
-        loadProducts();
-        loadStatuses();
-        final boolean isEditing = invoice != null && invoice.getId() != null;
-        if(isEditing) {
-            this.customerComboBox.setValue(invoice.getCustomer());
-            this.customerComboBox.setDisable(true);
-            this.dueDatePicker.setValue(invoice.getDueDate());
-            this.dueDatePicker.setDisable(true);
-            this.addItemButton.setDisable(true);
-            this.removeItemButton.setDisable(true);
-            this.statusGrid.setVisible(true);
-            this.statusGrid.setManaged(true);
-            this.statusComboBox.setValue(invoice.getStatus());
-            new Thread(() -> {
-                List<InvoiceItem> invoiceItems = api.getInvoiceItems(invoice.getId());
+    @FXML
+    public void onSave() {
+        if(!validateFields()) return;
+        Customer selectedCustomer = this.customerComboBox.getValue();
+        LocalDate date = this.invoiceDatePicker.getValue();
+        Status selectedStatus = this.statusComboBox.getValue();
+        new Thread(() -> {
+            try {
+                boolean success;
+                if(invoice == null || invoice.getId() == null) {
+                    List<InvoiceItemRequest> itemRequests = new ArrayList<>();
+                    for(LineItemRow row : lineItems) {
+                        itemRequests.add(convertToInvoiceItemRequest(row));
+                    }
+                    success = api.createInvoice(selectedCustomer.getId(), itemRequests, date) != null;
+                }else {
+                    success = api.updateInvoiceStatus(invoice.getId(), selectedStatus.getId());
+                }
                 Platform.runLater(() -> {
+                    if(success) goBack();
+                    else General.showError(this.errorLabel, "An unexpected error happened while trying to create the invoice. Please contact an administrator");
+                });
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+    public void setInvoice(Invoice invoice) {
+        this.invoice = invoice;
+        if(invoice == null || invoice.getId() == null) {
+            this.titleLabel.setText("New Invoice");
+            this.deleteButton.setVisible(false);
+            this.deleteButton.setManaged(false);
+            Status temp = new Status();
+            temp.setName("UNPAID");
+            temp.setType("INVOICE");
+            this.statusComboBox.setValue(temp);
+            this.statusComboBox.setDisable(true);
+        }else {
+            this.titleLabel.setText("Edit Invoice #" + invoice.getId());
+            this.customerComboBox.setDisable(true);
+            this.invoiceDatePicker.setDisable(true);
+            populateFields();
+        }
+    }
+    private InvoiceItemRequest convertToInvoiceItemRequest(LineItemRow itemRow) {
+        InvoiceItemRequest request = new InvoiceItemRequest();
+        request.setProductId(itemRow.getProduct().getId());
+        request.setQuantity(itemRow.getQuantity());
+        return request;
+    }
+    private boolean validateFields() {
+        if (customerComboBox.getValue() == null) {
+            General.showError(this.errorLabel, "Please select a customer");
+            return false;
+        }
+        if (invoiceDatePicker.getValue() == null) {
+            General.showError(this.errorLabel, "Please select an invoice date");
+            return false;
+        }
+        if (statusComboBox.getValue() == null) {
+            General.showError(this.errorLabel, "Please select a status");
+            return false;
+        }
+        if (lineItems.isEmpty()) {
+            General.showError(this.errorLabel, "Please add at least one line item");
+            return false;
+        }
+        this.errorLabel.setVisible(false);
+        this.errorLabel.setManaged(false);
+        return true;
+    }
+    private void setupColumns() {
+        this.productColumn.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getProductName()));
+        this.descriptionColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().description));
+        this.quantityColumn.setCellValueFactory(cellData -> cellData.getValue().getQuantityProperty().asObject());
+        this.quantityColumn.setCellFactory(column -> new TableCell<>() {
+            private final Spinner<Integer> spinner = new Spinner<>(1, 999, 1);
+            @Override
+            protected void updateItem(Integer quantity, boolean empty) {
+                super.updateItem(quantity, empty);
+                if(empty) setGraphic(null);
+                else {
+                    LineItemRow row = getTableView().getItems().get(getIndex());
+                    spinner.getValueFactory().setValue(quantity);
+                    spinner.valueProperty().addListener((obs, oldVal, newVal) -> {
+                        row.setQuantity(newVal);
+                        updateTotals();
+                    });
+                    setGraphic(spinner);
+                    setAlignment(Pos.CENTER);
+                }
+            }
+        });
+        this.priceColumn.setCellValueFactory(cellData -> cellData.getValue().getPriceProperty().asObject());
+        this.priceColumn.setCellFactory(column -> new TableCell<>() {
+            @Override
+            protected void updateItem(Double price, boolean empty) {
+                super.updateItem(price, empty);
+                if(empty || price == null) setText(null);
+                else setText(String.format("$%.2f", price));
+            }
+        });
+        this.totalColumn.setCellValueFactory(cellData -> cellData.getValue().getTotalProperty().asObject());
+        this.totalColumn.setCellFactory(column -> new TableCell<>() {
+            @Override
+            protected void updateItem(Double total, boolean empty) {
+                super.updateItem(total, empty);
+                if(empty || total == null) setText(null);
+                else setText(String.format("$%.2f", total));
+            }
+        });
+        this.actionsColumn.setCellFactory(column -> new TableCell<>() {
+            private final Button delButton = new Button("🗑");
+            {
+                delButton.setStyle("-fx-background-color: transparent; -fx-cursor: hand; -fx-text-fill: #ef4444; -fx-font-size: 16px;");
+            }
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if(empty || getIndex() < 0 || getIndex() >= getTableView().getItems().size()) setGraphic(null);
+                else {
+                    delButton.setOnAction(e -> {
+                        LineItemRow row = getTableView().getItems().get(getIndex());
+                        lineItems.remove(row);
+                        updateTotals();
+                    });
+                    setGraphic(delButton);
+                    setAlignment(Pos.CENTER);
+                }
+            }
+        });
+        lineItemsTable.setItems(lineItems);
+    }
+    private void populateFields() {
+        this.invoiceDatePicker.setValue(invoice.getDueDate());
+        this.statusComboBox.setValue(invoice.getStatus());
+        new Thread(() -> {
+            List<InvoiceItem> invoiceItems = api.getInvoiceItems(invoice.getId());
+            Platform.runLater(() -> {
+                if(invoiceItems != null && !invoiceItems.isEmpty()) {
                     for(InvoiceItem item : invoiceItems) {
-                        this.lineItems.add(new InvoiceLineItem(
+                        lineItems.add(new LineItemRow(
                                 item.getProduct(),
+                                item.getProduct().getDescription(),
                                 item.getQuantity(),
                                 item.getPriceAtSale()
                         ));
                     }
-                    this.itemsTable.setItems(lineItems);
-                });
-            }).start();
-        }
+                }
+                updateTotals();
+            });
+        }).start();
     }
     private void loadCustomers() {
         new Thread(() -> {
             List<Customer> customers = api.getCustomers();
             ObservableList<Customer> observableList = FXCollections.observableArrayList(customers);
-            Platform.runLater(() -> this.customerComboBox.setItems(observableList));
-        }).start();
-    }
-    private void loadProducts() {
-        new Thread(() -> {
-            this.availableProducts = api.getProducts();
+            Platform.runLater(() -> {
+                this.customerComboBox.setItems(observableList);
+                if(invoice != null && invoice.getCustomer() != null) this.customerComboBox.setValue(invoice.getCustomer());
+            });
         }).start();
     }
     private void loadStatuses() {
@@ -253,16 +289,52 @@ public class InvoiceFormController {
             Platform.runLater(() -> this.statusComboBox.setItems(observableList));
         }).start();
     }
-    private void updateTotalLabel() {
-        BigDecimal total = BigDecimal.ZERO;
-        for(InvoiceLineItem item : lineItems) {
-            total = total.add(item.getLineTotal());
-        }
-        this.totalLabel.setText(String.format("$ %.2f", total));
+    private void loadProducts() {
+        new Thread(() -> allProducts = api.getProducts()).start();
     }
-    public record InvoiceLineItem(Product product, int quantity, BigDecimal price) {
-        public BigDecimal getLineTotal() {
-                return price.multiply(BigDecimal.valueOf(quantity));
+    private void updateTotals() {
+        BigDecimal subtotal = calculateTotal();
+        this.subtotalLabel.setText(String.format("$%.2f", subtotal));
+        this.totalLabel.setText(String.format("$%.2f", subtotal));
+    }
+    private BigDecimal calculateTotal() {
+        double subtotal = lineItems.stream()
+                .mapToDouble(LineItemRow::getLineTotal)
+                .sum();
+        return BigDecimal.valueOf(subtotal);
+    }
+    private void goBack() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/tamv/systema/frontend/invoice-view.fxml"));
+            loader.setControllerFactory(controllerClass -> new InvoiceViewController(this.api, this.contentArea));
+            Parent invoiceView = loader.load();
+            contentArea.getChildren().clear();
+            contentArea.getChildren().add(invoiceView);
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    @Getter @AllArgsConstructor @NoArgsConstructor
+    public static class LineItemRow {
+        private Product product;
+        private String description;
+        @Setter
+        private Integer quantity;
+        private BigDecimal unitPrice;
+        public Double getLineTotal() {
+            return Double.parseDouble(unitPrice.multiply(new BigDecimal(quantity)).toString());
+        }
+        public String getProductName() {
+            return product != null ? product.getName() : "N/A";
+        }
+        public SimpleIntegerProperty getQuantityProperty() {
+            return new SimpleIntegerProperty(quantity);
+        }
+        public SimpleDoubleProperty getPriceProperty() {
+            return new SimpleDoubleProperty(Double.parseDouble(unitPrice.toString()));
+        }
+        public SimpleDoubleProperty getTotalProperty() {
+            return new SimpleDoubleProperty(getLineTotal());
         }
     }
 }
