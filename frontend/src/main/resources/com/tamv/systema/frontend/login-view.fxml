@@ -1,53 +1,102 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.net.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="195.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.tamv.systema.frontend.LoginController">
+<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="530.0" prefWidth="900.0" styleClass="window-container" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.tamv.systema.frontend.LoginController">
+   <stylesheets>
+      <URL value="@styles/login-styles.css" />
+   </stylesheets>
+   <StackPane styleClass="login-container">
+      <children>
+         <VBox alignment="CENTER" prefWidth="900.0" spacing="20.0" styleClass="right-panel">
+            <StackPane.alignment>CENTER</StackPane.alignment>
+            <padding>
+               <Insets bottom="40.0" left="480.0" right="50.0" top="40.0" />
+            </padding>
+            <Label styleClass="login-header" text="Systema Login" textAlignment="CENTER">
+               <font>
+                  <Font name="Georgia" size="18.0" />
+               </font>
+            </Label>
+            <Region prefHeight="20.0" />
+            <VBox maxWidth="350.0" spacing="8.0">
+               <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="input-container">
+                  <Label styleClass="input-icon" text="👤">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="usernameField" promptText="Username" styleClass="input-field" HBox.hgrow="ALWAYS">
+                     <font>
+                        <Font name="Georgia" size="13.0" />
+                     </font>
+                  </TextField>
+               </HBox>
+            </VBox>
+            <VBox maxWidth="350.0" spacing="8.0">
+               <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="input-container">
+                  <Label styleClass="input-icon" text="🔒">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
+                  <PasswordField fx:id="passwordField" promptText="Password" styleClass="input-field" HBox.hgrow="ALWAYS">
+                     <font>
+                        <Font name="Georgia" size="13.0" />
+                     </font>
+                  </PasswordField>
+               </HBox>
+            </VBox>
+            <Region prefHeight="10.0" />
+            <Button fx:id="loginButton" maxWidth="350.0" mnemonicParsing="false" onAction="#handleLoginButton" prefHeight="45.0" styleClass="login-button" text="Log In">
+               <font>
+                  <Font name="Georgia Bold" size="14.0" />
+               </font>
+            </Button>
+            <Hyperlink styleClass="forgot-password" text="Forgot Password?">
+               <font>
+                  <Font name="Georgia" size="12.0" />
+               </font>
+            </Hyperlink>
+            <Label fx:id="errorLabel" alignment="CENTER" maxWidth="350.0" styleClass="error-label" textAlignment="CENTER" wrapText="true">
+               <font>
+                  <Font name="Georgia" size="12.0" />
+               </font>
+            </Label>
+            <Region VBox.vgrow="ALWAYS" />
+            <Label styleClass="footer" text="Copyright © 2025 TAMV C.A. All rights reserved." textAlignment="CENTER">
+               <font>
+                  <Font name="Georgia" size="10.0" />
+               </font>
+            </Label>
+         </VBox>
+         <VBox alignment="CENTER" maxWidth="420.0" prefHeight="500.0" prefWidth="420.0" spacing="25.0" styleClass="left-panel-elevated" StackPane.alignment="CENTER_LEFT">
+            <padding>
+               <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+            </padding>
+            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="200.0">
+               <ImageView fx:id="logoImageView" fitHeight="180.0" fitWidth="180.0" pickOnBounds="true" preserveRatio="true" />
+            </VBox>
+
+            <Label styleClass="company-name" text="TAMV C.A." textAlignment="CENTER">
+               <font>
+                  <Font name="Georgia Bold" size="28.0" />
+               </font>
+            </Label>
+            <Label styleClass="tagline" text="Medical Equipment Management System" textAlignment="CENTER" wrapText="true">
+               <font>
+                  <Font name="Georgia" size="14.0" />
+               </font>
+            </Label>
+         </VBox>
+      </children>
+   </StackPane>
    <padding>
       <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
    </padding>
-   <Label alignment="TOP_CENTER" prefWidth="150.0" text="Systema Login" textAlignment="CENTER">
-      <font>
-         <Font name="Georgia Bold" size="20.0" />
-      </font>
-   </Label>
-   <Label />
-   <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="49.0" prefWidth="580.0">
-      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
-         <Label alignment="TOP_LEFT" layoutX="8.0" layoutY="2.0" prefHeight="20.0" prefWidth="60.0" text="Username">
-            <font>
-               <Font name="Georgia" size="12.0" />
-            </font>
-         </Label>
-         <TextField fx:id="usernameField" layoutX="68.0" layoutY="-2.0" prefHeight="25.0" prefWidth="510.0">
-            <font>
-               <Font name="Georgia" size="12.0" />
-            </font>
-         </TextField>
-      </AnchorPane>
-      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="89.0" prefWidth="578.0">
-         <Label layoutX="7.0" prefHeight="20.0" prefWidth="60.0" text="Password">
-            <font>
-               <Font name="Georgia" size="12.0" />
-            </font>
-         </Label>
-         <PasswordField fx:id="passwordField" layoutX="68.0" layoutY="-2.0" prefHeight="25.0" prefWidth="510.0" />
-      </AnchorPane>
-   </SplitPane>
-   <Label />
-   <Pane prefHeight="65.0" prefWidth="580.0">
-      <Button fx:id="loginButton" alignment="CENTER" layoutX="249.0" layoutY="2.0" mnemonicParsing="false" onAction="#handleLoginButton" prefHeight="25.0" prefWidth="90.0" text="Log in" textAlignment="CENTER">
-         <font>
-            <Font name="Georgia" size="12.0" />
-         </font>
-      </Button>
-      <Label fx:id="errorLabel" alignment="CENTER" layoutX="39.0" layoutY="39.0" prefHeight="17.0" prefWidth="510.0" textAlignment="CENTER">
-         <font>
-            <Font name="Georgia" size="20.0" />
-         </font>
-      </Label>
-   </Pane>
-</VBox>
+</StackPane>

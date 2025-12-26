@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox styleClass="detail-view-container" stylesheets="@styles/shared-forms.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.tamv.systema.frontend.RepairOrderFormController">
+
+    <HBox alignment="CENTER_LEFT" styleClass="detail-header">
+        <Button onAction="#onBack" styleClass="back-button" text="← Back to Repair Orders" />
+        <Region HBox.hgrow="ALWAYS" />
+        <Button fx:id="deleteButton" onAction="#onDelete" styleClass="danger-button" text="🗑 Delete" />
+    </HBox>
+    <ScrollPane fitToWidth="true" styleClass="form-scroll-pane" VBox.vgrow="ALWAYS">
+        <VBox spacing="20" styleClass="form-content">
+            <padding>
+                <Insets bottom="30" left="40" right="40" top="30" />
+            </padding>
+            <Label fx:id="titleLabel" styleClass="detail-title" text="Repair Order Details" />
+            <VBox spacing="15" styleClass="form-section">
+                <VBox spacing="5">
+                    <Label styleClass="form-field-label" text="Customer *" />
+                    <ComboBox fx:id="customerComboBox" maxWidth="Infinity" promptText="Click to search customers" styleClass="form-field" />
+                </VBox>
+                <VBox spacing="5">
+                    <Label styleClass="form-field-label" text="Equipment Description *" />
+                    <TextField fx:id="equipmentField" promptText="e.g., Ultrasound Machine Model XYZ" styleClass="form-field" />
+                </VBox>
+                <VBox spacing="5">
+                    <Label styleClass="form-field-label" text="Serial Number" />
+                    <TextField fx:id="serialNumberField" promptText="Equipment serial number" styleClass="form-field" />
+                </VBox>
+                <VBox spacing="5">
+                    <Label styleClass="form-field-label" text="Issue Description *" />
+                    <TextArea fx:id="issueField" prefRowCount="4" promptText="Describe the problem with the equipment..." styleClass="form-field" />
+                </VBox>
+                <VBox spacing="5">
+                    <Label styleClass="form-field-label" text="Status *" />
+                    <ComboBox fx:id="statusComboBox" maxWidth="Infinity" promptText="Select status..." styleClass="form-field" />
+                </VBox>
+                <VBox spacing="5">
+                    <Label styleClass="form-field-label" text="Technician Notes" />
+                    <TextArea fx:id="notesField" prefRowCount="4" promptText="Additional notes, work performed, parts used, etc." styleClass="form-field" />
+                </VBox>
+            </VBox>
+            <Label fx:id="errorLabel" managed="false" styleClass="error-label" visible="false" wrapText="true" />
+            <HBox alignment="CENTER_LEFT" spacing="15" styleClass="form-actions">
+                <Button onAction="#onSave" styleClass="primary-button" text="Save Changes" />
+                <Button onAction="#onBack" styleClass="secondary-button" text="Cancel" />
+            </HBox>
+        </VBox>
+    </ScrollPane>
+
+</VBox>

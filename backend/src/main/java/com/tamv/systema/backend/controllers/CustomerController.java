@@ -35,7 +35,7 @@ public class CustomerController {
      * @return A customer by their ID or 404 Not Found status
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {
+    public ResponseEntity<Customer> getCustomerById(@PathVariable("id") Long id) {
         Optional<Customer> customer = customerRepository.findById(id);
         return customer.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -60,7 +60,7 @@ public class CustomerController {
      * @return The updated customer or 404 Not Found status
      */
     @PutMapping("/{id}")
-    public ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @RequestBody Customer customerDetails) {
+    public ResponseEntity<Customer> updateCustomer(@PathVariable("id") Long id, @RequestBody Customer customerDetails) {
         return customerRepository.findById(id).map(existingCustomer -> {
             existingCustomer.setFullName(customerDetails.getFullName());
             existingCustomer.setEmail(customerDetails.getEmail());
@@ -77,7 +77,7 @@ public class CustomerController {
      * @return 204 No Content on success, or 404 Not Found
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteCustomer(@PathVariable("id") Long id) {
         if(!customerRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }

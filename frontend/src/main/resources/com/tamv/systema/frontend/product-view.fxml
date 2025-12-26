@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="TOP_CENTER" spacing="20" styleClass="view-container" stylesheets="@styles/shared-views.css" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.12" fx:controller="com.tamv.systema.frontend.ProductViewController">
+    <HBox alignment="CENTER_LEFT" styleClass="view-header">
+        <Label styleClass="view-title" text="👥 Products" />
+        <Region HBox.hgrow="ALWAYS" />
+        <Button onAction="#handleNewProduct" styleClass="primary-button" text="+ Add Product" />
+    </HBox>
+    <TextField fx:id="searchField" onKeyReleased="#onSearch" promptText="🔍 Search products..." styleClass="search-bar" />
+    <ScrollPane fitToWidth="true" styleClass="cards-scroll-pane" VBox.vgrow="ALWAYS">
+        <FlowPane fx:id="cardsContainer" hgap="20" styleClass="cards-grid" vgap="20" />
+    </ScrollPane>
+
+</VBox>

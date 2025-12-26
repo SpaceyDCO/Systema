@@ -56,8 +56,8 @@ public class InvoiceService {
     public Invoice createInvoice(InvoiceCreateRequest request) {
         Customer customer = customerRepository.findById(request.getCustomerId())
                 .orElseThrow(() -> new RuntimeException("Customer not found with id: " + request.getCustomerId()));
-        Status initialStatus = statusRepository.findByNameAndType("DRAFT", StatusType.INVOICE)
-                .orElseThrow(() -> new RuntimeException("Initial status 'DRAFT' not found. Please make sure default statuses are configured in the database."));
+        Status initialStatus = statusRepository.findByNameAndType("UNPAID", StatusType.INVOICE)
+                .orElseThrow(() -> new RuntimeException("Initial status 'UNPAID' not found. Please make sure default statuses are configured in the database."));
         Invoice invoice = new Invoice();
         invoice.setCustomer(customer);
         invoice.setStatus(initialStatus);
@@ -83,5 +83,8 @@ public class InvoiceService {
         invoiceItemRepository.saveAll(itemsToSave);
         savedInvoice.setTotalAmount(totalAmount);
         return invoiceRepository.save(savedInvoice);
+    }
+    public List<InvoiceItem> getInvoiceItems(Long invoiceId) {
+        return invoiceItemRepository.findByInvoiceId(invoiceId);
     }
 }

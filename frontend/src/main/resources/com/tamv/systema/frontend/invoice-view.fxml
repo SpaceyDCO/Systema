@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.tamv.systema.frontend.InvoiceViewController"
+      styleClass="view-container"
+      stylesheets="@styles/shared-views.css"
+      spacing="20"
+      alignment="TOP_CENTER">
+    <HBox styleClass="view-header" alignment="CENTER_LEFT">
+        <Label text="📄 Invoices" styleClass="view-title"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="+ Create Invoice"
+                styleClass="primary-button"
+                onAction="#onAddInvoice"/>
+    </HBox>
+    <HBox spacing="15" alignment="CENTER_LEFT">
+        <TextField fx:id="searchField"
+                   promptText="🔍 Search invoices..."
+                   styleClass="search-bar"
+                   HBox.hgrow="ALWAYS"
+                   onKeyReleased="#onSearch"/>
+        <MenuButton text="Filter" styleClass="filter-button">
+            <items>
+                <MenuItem text="All Invoices" onAction="#onFilterAll"/>
+                <MenuItem text="Paid" onAction="#onFilterPaid"/>
+                <MenuItem text="Unpaid" onAction="#onFilterUnpaid"/>
+                <MenuItem text="Overdue" onAction="#onFilterOverdue"/>
+            </items>
+        </MenuButton>
+    </HBox>
+    <ScrollPane styleClass="cards-scroll-pane"
+                fitToWidth="true"
+                VBox.vgrow="ALWAYS">
+        <FlowPane fx:id="cardsContainer"
+                  styleClass="cards-grid"
+                  hgap="20"
+                  vgap="20"
+        />
+    </ScrollPane>
+
+</VBox>

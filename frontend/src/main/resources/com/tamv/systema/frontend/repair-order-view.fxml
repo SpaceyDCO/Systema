@@ -3,20 +3,20 @@
 <?import javafx.scene.control.*?>
 
 <VBox xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.tamv.systema.frontend.CustomerViewController"
+      fx:controller="com.tamv.systema.frontend.RepairOrderViewController"
       styleClass="view-container"
       stylesheets="@styles/shared-views.css"
       spacing="20"
       alignment="TOP_CENTER">
     <HBox styleClass="view-header" alignment="CENTER_LEFT">
-        <Label text="👥 Customers" styleClass="view-title"/>
+        <Label text="🔧 Repair Orders" styleClass="view-title"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Button text="+ Add Customer"
+        <Button text="+ New Repair Order"
                 styleClass="primary-button"
-                onAction="#onAddCustomer"/>
+                onAction="#onAddRepair"/>
     </HBox>
     <TextField fx:id="searchField"
-               promptText="🔍 Search customers..."
+               promptText="🔍 Search repairs..."
                styleClass="search-bar"
                onKeyReleased="#onSearch"/>
     <ScrollPane styleClass="cards-scroll-pane"

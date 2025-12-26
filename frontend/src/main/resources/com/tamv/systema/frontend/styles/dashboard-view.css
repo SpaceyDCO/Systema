@@ -1,0 +1,30 @@
+.dashboard-container {
+    -fx-padding: 30px;
+}
+
+.stats-grid {
+    -fx-alignment: center;
+}
+
+.stat-card {
+    -fx-background-color: white;
+    -fx-background-radius: 12px;
+    -fx-padding: 30px;
+    -fx-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 2);
+    -fx-min-width: 220px;
+    -fx-min-height: 150px;
+    -fx-spacing: 10px;
+}
+
+.stat-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #6b7280;
+    -fx-font-weight: 500;
+}
+
+.stat-number {
+    -fx-font-size: 48px;
+    -fx-text-fill: #48c9a8;
+    -fx-font-weight: bold;
+}

@@ -1,17 +1,18 @@
 package com.tamv.systema.frontend.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Setter @Getter @NoArgsConstructor
-public class Customer {
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor
+public class Status {
     private Long id;
-    private String fullName;
-    private String email;
-    private String phoneNumber;
+    private String name;
+    private String type;
     @Override
     public String toString() {
-        return fullName;
+        return name;
     }
 }

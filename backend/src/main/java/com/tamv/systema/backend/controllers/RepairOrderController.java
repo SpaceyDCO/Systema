@@ -36,7 +36,7 @@ public class RepairOrderController {
      * @return The order or 404 not found status
      */
     @GetMapping("/{id}")
-    public ResponseEntity<RepairOrder> getOrderById(@PathVariable Long id) {
+    public ResponseEntity<RepairOrder> getOrderById(@PathVariable("id") Long id) {
         try {
             RepairOrder order = this.repairOrderService.getRepairOrderById(id);
             return ResponseEntity.ok(order);
@@ -70,7 +70,7 @@ public class RepairOrderController {
      * @return Response entity containing the updated RepairOrder with an HTTP Status 200
      */
     @PutMapping("/{id}/status")
-    public ResponseEntity<RepairOrder> updateOrderStatus(@PathVariable Long id, @RequestBody RepairOrderStatusUpdateRequest request) {
+    public ResponseEntity<RepairOrder> updateOrderStatus(@PathVariable("id") Long id, @RequestBody RepairOrderStatusUpdateRequest request) {
         try {
             RepairOrder repairOrder = this.repairOrderService.updateOrderStatus(id, request.getStatusId());
             return ResponseEntity.ok(repairOrder);
@@ -87,7 +87,7 @@ public class RepairOrderController {
      * @return Response entity containing the updated RepairOrder with an HTTP Status 200
      */
     @PutMapping("/{id}/notes")
-    public ResponseEntity<RepairOrder> updateOrderNotes(@PathVariable Long id, @RequestBody RepairOrderNotesUpdateRequest request) {
+    public ResponseEntity<RepairOrder> updateOrderNotes(@PathVariable("id") Long id, @RequestBody RepairOrderNotesUpdateRequest request) {
         try {
             RepairOrder repairOrder = this.repairOrderService.updateOrderNotes(id, request.getTechnicianNotes());
             return ResponseEntity.ok(repairOrder);
@@ -103,7 +103,7 @@ public class RepairOrderController {
      * 404 Not Found otherwise
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRepairOrder(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteRepairOrder(@PathVariable("id") Long id) {
         try {
             this.repairOrderService.deleteRepairOrder(id);
             return ResponseEntity.noContent().build();
