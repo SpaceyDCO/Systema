@@ -1,6 +1,6 @@
 # Systema
 
-**Project Status:** [Back-End Phase Complete]
+**Project Status:** [Back-End & Front-End CRUD Operations Complete]
 
 ---
 
