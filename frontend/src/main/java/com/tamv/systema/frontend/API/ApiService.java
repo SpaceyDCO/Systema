@@ -346,6 +346,7 @@ public class ApiService {
             return null;
         }
     }
+    //TODO: Update an invoice's due date
     public boolean updateInvoiceStatus(Long invoiceId, Long statusId) {
         Map<String, Long> requestBody = new HashMap<>();
         requestBody.put("statusId", statusId);
