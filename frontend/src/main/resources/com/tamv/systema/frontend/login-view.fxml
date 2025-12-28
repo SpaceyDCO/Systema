@@ -7,24 +7,34 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="530.0" prefWidth="900.0" styleClass="window-container" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.tamv.systema.frontend.LoginController">
+<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" styleClass="window-container" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.tamv.systema.frontend.LoginController">
    <stylesheets>
       <URL value="@styles/login-styles.css" />
    </stylesheets>
    <StackPane styleClass="login-container">
       <children>
-         <VBox alignment="CENTER" prefWidth="900.0" spacing="20.0" styleClass="right-panel">
+         <VBox alignment="CENTER" spacing="20.0" styleClass="right-panel">
             <StackPane.alignment>CENTER</StackPane.alignment>
             <padding>
-               <Insets bottom="40.0" left="480.0" right="50.0" top="40.0" />
+               <Insets bottom="40.0" left="480.0" right="50.0" top="20.0" />
             </padding>
+            <HBox spacing="15.0">
+               <children>
+                  <Region prefHeight="52.0" prefWidth="314.0" />
+                  <Button fx:id="minimizeButton" mnemonicParsing="false" onAction="#onMinimized" styleClass="minimize-button" text="-" />
+                  <Button fx:id="closeButton" mnemonicParsing="false" onAction="#onClosed" styleClass="close-button" text="X">
+                     <HBox.margin>
+                        <Insets />
+                     </HBox.margin>
+                  </Button>
+               </children></HBox>
             <Label styleClass="login-header" text="Systema Login" textAlignment="CENTER">
                <font>
                   <Font name="Georgia" size="18.0" />
                </font>
             </Label>
             <Region prefHeight="20.0" />
-            <VBox maxWidth="350.0" spacing="8.0">
+            <VBox spacing="8.0">
                <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="input-container">
                   <Label styleClass="input-icon" text="👤">
                      <font>
@@ -38,7 +48,7 @@
                   </TextField>
                </HBox>
             </VBox>
-            <VBox maxWidth="350.0" spacing="8.0">
+            <VBox spacing="8.0">
                <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="input-container">
                   <Label styleClass="input-icon" text="🔒">
                      <font>

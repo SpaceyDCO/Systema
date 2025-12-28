@@ -4,6 +4,7 @@ import com.tamv.systema.frontend.API.ApiService;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
@@ -12,12 +13,17 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
+import javax.swing.*;
 import java.util.Objects;
 
 public class LoginController {
     private final ApiService apiService;
     @FXML
     public ImageView logoImageView;
+    @FXML
+    public Button closeButton;
+    @FXML
+    public Button minimizeButton;
     @FXML
     private TextField usernameField;
     @FXML
@@ -38,6 +44,16 @@ public class LoginController {
             System.err.println("Could not load logo image");
             e.printStackTrace();
         }
+    }
+    @FXML
+    public void onClosed(ActionEvent event) {
+        Scene scene = ((Button) event.getSource()).getScene();
+        ((Stage) scene.getWindow()).close();
+    }
+    @FXML
+    public void onMinimized(ActionEvent event) {
+        Scene scene = ((Button) event.getSource()).getScene();
+        ((Stage) scene.getWindow()).setIconified(true);
     }
     @FXML
     protected void handleLoginButton(ActionEvent event) {
