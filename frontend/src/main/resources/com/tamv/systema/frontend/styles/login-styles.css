@@ -129,3 +129,31 @@
     -fx-font-size: 10;
     -fx-padding: 10 0 0 0;
 }
+
+.minimize-button {
+    -fx-text-fill: lightgray;
+    -fx-font-size: 20;
+    -fx-background-color: #f5f5f5;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 5, 0, 0, 2);
+    -fx-cursor: hand;
+}
+
+.minimize-button:hover {
+    -fx-background-color: lightgray;
+    -fx-text-fill: white;
+}
+
+.close-button {
+    -fx-text-fill: lightgray;
+    -fx-font-size: 20;
+    -fx-background-color: #f5f5f5;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 5, 0, 0, 2);
+    -fx-cursor: hand;
+}
+
+.close-button:hover {
+    -fx-background-color: #ff8a8a;
+    -fx-text-fill: white;
+}
