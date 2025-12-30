@@ -1,0 +1,61 @@
+services:
+  # MariaDB
+  mariadb:
+    image: mariadb:11.2
+    container_name: systema-mariadb # Container name
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${DB_NAME}
+      MARIADB_USER: ${DB_USER}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      #Exposed for local debugging only
+    ports:
+      - "3307:3306"
+    volumes:
+      - mariadb-data:/var/lib/mysql
+      - ./backend/docker/mariadb/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+    # Attach to custom network
+    networks:
+      - systema-network
+
+  # Spring Boot
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: systema-backend
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASSWORD}
+      JAVA_OPTS: ${JAVA_OPTS}
+    ports:
+      - "8080:8080"
+    depends_on:
+      mariadb:
+        condition: service_healthy # Wait for MariaDB to be "Healthy"
+    networks:
+      - systema-network
+
+# Data storage
+volumes:
+  # Stored in /var/lib/docker/volumes/
+  mariadb-data:
+    driver: local
+
+# Networks
+networks:
+  systema-network:
+    driver: bridge
