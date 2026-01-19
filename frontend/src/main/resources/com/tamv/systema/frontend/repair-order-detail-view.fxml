@@ -47,7 +47,7 @@
             <HBox alignment="CENTER_LEFT" spacing="15" styleClass="form-actions">
                 <Button onAction="#onSave" styleClass="primary-button" text="Save Changes" />
                 <Button onAction="#onBack" styleClass="secondary-button" text="Cancel" />
-                <Button text="Generate Repair View" styleClass="secondary-button" onAction="#onGenerateRepairPdf"/>
+                <Button fx:id="generateRepairView" onAction="#onGenerateRepairPdf" styleClass="secondary-button" text="Generate Repair View" />
             </HBox>
         </VBox>
     </ScrollPane>
